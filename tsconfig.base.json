@@ -17,7 +17,8 @@
     "paths": {
       "product/Routes": ["apps/product/src/app/remote-entry/entry.routes.ts"],
       "cart/Routes": ["apps/cart/src/app/remote-entry/entry.routes.ts"],
-      "auth/Routes": ["apps/auth/src/app/remote-entry/entry.routes.ts"]
+      "auth/Routes": ["apps/auth/src/app/remote-entry/entry.routes.ts"],
+      "@ecommerce-mf/session": ["libs/session/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
