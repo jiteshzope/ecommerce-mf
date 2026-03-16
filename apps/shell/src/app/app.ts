@@ -1,13 +1,8 @@
-import { Component, DestroyRef, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  AUTH_SHELL_CHANNEL,
-  CART_SHELL_CHANNEL,
-  PRODUCT_SHELL_CHANNEL,
-  type AnyShellEvent,
-} from '@ecommerce-mf/session';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { merge } from 'rxjs';
+import { AuthRemoteService } from './services/auth-remote.service';
+import { CartRemoteService } from './services/cart-remote.service';
+import { ProductRemoteService } from './services/product-remote.service';
 
 @Component({
   imports: [RouterModule],
@@ -18,28 +13,8 @@ import { merge } from 'rxjs';
 export class App {
   protected title = 'shell';
 
-  readonly receivedEvents: AnyShellEvent[] = [];
-
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly authChannel = inject(AUTH_SHELL_CHANNEL, { optional: true });
-  private readonly cartChannel = inject(CART_SHELL_CHANNEL, { optional: true });
-  private readonly productChannel = inject(PRODUCT_SHELL_CHANNEL, {
-    optional: true,
-  });
-
-  constructor() {
-    if (!this.authChannel || !this.cartChannel || !this.productChannel) {
-      return;
-    }
-
-    merge(
-      this.authChannel.events$,
-      this.cartChannel.events$,
-      this.productChannel.events$,
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((event) => {
-        this.receivedEvents.push(event);
-      });
-  }
+  // Injecting the services at the shell root initialises their event subscriptions
+  readonly authRemote = inject(AuthRemoteService);
+  readonly cartRemote = inject(CartRemoteService);
+  readonly productRemote = inject(ProductRemoteService);
 }

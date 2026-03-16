@@ -29,4 +29,40 @@ export type ProductShellEvent = BaseShellEvent<
   }
 >;
 
-export type AnyShellEvent = AuthShellEvent | CartShellEvent | ProductShellEvent;
+// Shell -> Auth remote events
+export type ShellAuthEvent = BaseShellEvent<
+  'shell',
+  {
+    message: string;
+    redirectUrl?: string;
+  }
+>;
+
+// Shell -> Cart remote events
+export type ShellCartEvent = BaseShellEvent<
+  'shell',
+  {
+    message: string;
+    productId?: string;
+    quantity?: number;
+  }
+>;
+
+// Shell -> Product remote events
+export type ShellProductEvent = BaseShellEvent<
+  'shell',
+  {
+    message: string;
+    productId?: string;
+    category?: string;
+    query?: string;
+  }
+>;
+
+export type AnyShellEvent =
+  | AuthShellEvent
+  | CartShellEvent
+  | ProductShellEvent
+  | ShellAuthEvent
+  | ShellCartEvent
+  | ShellProductEvent;
