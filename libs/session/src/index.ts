@@ -2,3 +2,6 @@ export * from './lib/contracts/session-user';
 export * from './lib/contracts/session-state';
 export * from './lib/contracts/login-request';
 export * from './lib/contracts/register-request';
+export * from './lib/contracts/remote-shell-channel';
+export * from './lib/contracts/remote-shell-events';
+export * from './lib/contracts/remote-shell-tokens';
