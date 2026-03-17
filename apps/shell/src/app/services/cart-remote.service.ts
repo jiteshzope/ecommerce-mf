@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import {
   CART_SHELL_CHANNEL,
+  CART_EVENT_TYPES,
+  REMOTE_SOURCES,
   type CartShellEvent,
   type ShellCartEvent,
 } from '@ecommerce-mf/session';
@@ -15,7 +17,7 @@ export class CartRemoteService {
   constructor() {
     this.cartChannel?.events$
       .pipe(
-        filter((event): event is CartShellEvent => event.source === 'cart'),
+        filter((event): event is CartShellEvent => event.source === REMOTE_SOURCES.CART),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event) => this.handleCartEvent(event));
@@ -25,19 +27,19 @@ export class CartRemoteService {
 
   private handleCartEvent(event: CartShellEvent): void {
     switch (event.type) {
-      case 'remote-ready':
+      case CART_EVENT_TYPES.REMOTE_READY:
         console.log('[Shell ← Cart] Remote is ready');
         break;
 
-      case 'cart-updated':
+      case CART_EVENT_TYPES.CART_UPDATED:
         console.log('[Shell ← Cart] Cart updated', event.payload);
         break;
 
-      case 'checkout-initiated':
+      case CART_EVENT_TYPES.CHECKOUT_INITIATED:
         console.log('[Shell ← Cart] Checkout initiated', event.payload);
         break;
 
-      case 'cart-cleared':
+      case CART_EVENT_TYPES.CART_CLEARED:
         console.log('[Shell ← Cart] Cart cleared');
         break;
 
@@ -51,35 +53,35 @@ export class CartRemoteService {
   private publishToCart(event: Omit<ShellCartEvent, 'source' | 'timestamp'>): void {
     this.cartChannel?.publish({
       ...event,
-      source: 'shell',
+      source: REMOTE_SOURCES.SHELL,
       timestamp: Date.now(),
     });
   }
 
   sendAddItem(productId: string, quantity: number): void {
     this.publishToCart({
-      type: 'add-item',
+      type: CART_EVENT_TYPES.ADD_ITEM,
       payload: { message: 'Add item to cart', productId, quantity },
     });
   }
 
   sendRemoveItem(productId: string): void {
     this.publishToCart({
-      type: 'remove-item',
+      type: CART_EVENT_TYPES.REMOVE_ITEM,
       payload: { message: 'Remove item from cart', productId },
     });
   }
 
   sendClearCart(): void {
     this.publishToCart({
-      type: 'clear-cart',
+      type: CART_EVENT_TYPES.CLEAR_CART,
       payload: { message: 'Clear the entire cart' },
     });
   }
 
   sendSyncCart(): void {
     this.publishToCart({
-      type: 'sync-cart',
+      type: CART_EVENT_TYPES.SYNC_CART,
       payload: { message: 'Sync cart state with server' },
     });
   }

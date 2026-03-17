@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import {
   PRODUCT_SHELL_CHANNEL,
+  PRODUCT_EVENT_TYPES,
+  REMOTE_SOURCES,
   type ProductShellEvent,
   type ShellProductEvent,
 } from '@ecommerce-mf/session';
@@ -18,7 +20,7 @@ export class ProductShellBridgeService {
     // Subscribe to events arriving from the shell
     this.productChannel?.events$
       .pipe(
-        filter((event): event is ShellProductEvent => event.source === 'shell'),
+        filter((event): event is ShellProductEvent => event.source === REMOTE_SOURCES.SHELL),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event) => this.handleShellEvent(event));
@@ -28,15 +30,15 @@ export class ProductShellBridgeService {
 
   private handleShellEvent(event: ShellProductEvent): void {
     switch (event.type) {
-      case 'load-product':
+      case PRODUCT_EVENT_TYPES.LOAD_PRODUCT:
         console.log('[Product ← Shell] Load product', event.payload);
         break;
 
-      case 'clear-selection':
+      case PRODUCT_EVENT_TYPES.CLEAR_SELECTION:
         console.log('[Product ← Shell] Clear selection');
         break;
 
-      case 'filter-by-category':
+      case PRODUCT_EVENT_TYPES.FILTER_BY_CATEGORY:
         console.log('[Product ← Shell] Filter by category', event.payload);
         break;
 
@@ -50,7 +52,7 @@ export class ProductShellBridgeService {
   private publish(event: Omit<ProductShellEvent, 'source' | 'timestamp'>): void {
     this.productChannel?.publish({
       ...event,
-      source: 'product',
+      source: REMOTE_SOURCES.PRODUCT,
       timestamp: Date.now(),
     });
   }

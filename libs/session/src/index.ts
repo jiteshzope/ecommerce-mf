@@ -5,3 +5,4 @@ export * from './lib/contracts/register-request';
 export * from './lib/contracts/remote-shell-channel';
 export * from './lib/contracts/remote-shell-events';
 export * from './lib/contracts/remote-shell-tokens';
+export * from './lib/contracts/communication-constants';

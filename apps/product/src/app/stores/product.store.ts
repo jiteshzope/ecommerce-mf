@@ -1,11 +1,13 @@
 import { inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { PRODUCT_EVENT_TYPES } from '@ecommerce-mf/session';
 import {
   ProductApiService,
   type ProductApiItem,
 } from '../services/product-api.service';
 import { ProductShellBridgeService } from '../services/product-shell-bridge.service';
+import { PRODUCT_MESSAGES } from '../constants/product-constants';
 
 interface ProductState {
   data: ProductApiItem[];
@@ -41,7 +43,7 @@ export const ProductStore = signalStore(
         } catch {
           patchState(store, {
             loading: false,
-            error: 'Failed to load product data.',
+            error: PRODUCT_MESSAGES.FAILED_TO_LOAD,
             data: [],
             empty: true,
           });

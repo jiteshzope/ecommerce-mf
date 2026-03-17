@@ -5,6 +5,7 @@ import { AuthRemoteService } from '../services/auth-remote.service';
 import { CartRemoteService } from '../services/cart-remote.service';
 import { ProductRemoteService } from '../services/product-remote.service';
 import { ShellApiService, type ShellDashboardItem } from '../services/shell-api.service';
+import { SHELL_MESSAGES } from '../constants/shell-constants';
 
 interface ShellState {
   data: ShellDashboardItem[];
@@ -44,7 +45,7 @@ export const ShellStore = signalStore(
         } catch {
           patchState(store, {
             loading: false,
-            error: 'Failed to load shell dashboard data.',
+            error: SHELL_MESSAGES.FAILED_TO_LOAD,
             data: [],
             empty: true,
           });

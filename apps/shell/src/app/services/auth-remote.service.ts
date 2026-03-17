@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import {
   AUTH_SHELL_CHANNEL,
+  AUTH_EVENT_TYPES,
+  REMOTE_SOURCES,
   type AuthShellEvent,
   type ShellAuthEvent,
 } from '@ecommerce-mf/session';
@@ -15,7 +17,7 @@ export class AuthRemoteService {
   constructor() {
     this.authChannel?.events$
       .pipe(
-        filter((event): event is AuthShellEvent => event.source === 'auth'),
+        filter((event): event is AuthShellEvent => event.source === REMOTE_SOURCES.AUTH),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event) => this.handleAuthEvent(event));
@@ -25,23 +27,23 @@ export class AuthRemoteService {
 
   private handleAuthEvent(event: AuthShellEvent): void {
     switch (event.type) {
-      case 'remote-ready':
+      case AUTH_EVENT_TYPES.REMOTE_READY:
         console.log('[Shell ← Auth] Remote is ready');
         break;
 
-      case 'login-success':
+      case AUTH_EVENT_TYPES.LOGIN_SUCCESS:
         console.log('[Shell ← Auth] Login succeeded', event.payload);
         break;
 
-      case 'login-failed':
+      case AUTH_EVENT_TYPES.LOGIN_FAILED:
         console.log('[Shell ← Auth] Login failed', event.payload);
         break;
 
-      case 'logout':
+      case AUTH_EVENT_TYPES.LOGOUT:
         console.log('[Shell ← Auth] User logged out', event.payload);
         break;
 
-      case 'register-success':
+      case AUTH_EVENT_TYPES.REGISTER_SUCCESS:
         console.log('[Shell ← Auth] Registration succeeded', event.payload);
         break;
 
@@ -55,35 +57,35 @@ export class AuthRemoteService {
   private publishToAuth(event: Omit<ShellAuthEvent, 'source' | 'timestamp'>): void {
     this.authChannel?.publish({
       ...event,
-      source: 'shell',
+      source: REMOTE_SOURCES.SHELL,
       timestamp: Date.now(),
     });
   }
 
   sendNavigateToLogin(redirectUrl?: string): void {
     this.publishToAuth({
-      type: 'navigate-to-login',
+      type: AUTH_EVENT_TYPES.NAVIGATE_TO_LOGIN,
       payload: { message: 'Navigate to the login page', redirectUrl },
     });
   }
 
   sendNavigateToRegister(): void {
     this.publishToAuth({
-      type: 'navigate-to-register',
+      type: AUTH_EVENT_TYPES.NAVIGATE_TO_REGISTER,
       payload: { message: 'Navigate to the register page' },
     });
   }
 
   sendSessionExpired(redirectUrl?: string): void {
     this.publishToAuth({
-      type: 'session-expired',
+      type: AUTH_EVENT_TYPES.SESSION_EXPIRED,
       payload: { message: 'Session has expired, please log in again', redirectUrl },
     });
   }
 
   sendLogoutRequested(): void {
     this.publishToAuth({
-      type: 'logout-requested',
+      type: AUTH_EVENT_TYPES.LOGOUT_REQUESTED,
       payload: { message: 'Logout requested by shell' },
     });
   }

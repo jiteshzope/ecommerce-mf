@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import {
   CART_SHELL_CHANNEL,
+  CART_EVENT_TYPES,
+  REMOTE_SOURCES,
   type CartShellEvent,
   type ShellCartEvent,
 } from '@ecommerce-mf/session';
@@ -16,7 +18,7 @@ export class CartShellBridgeService {
     // Subscribe to events arriving from the shell
     this.cartChannel?.events$
       .pipe(
-        filter((event): event is ShellCartEvent => event.source === 'shell'),
+        filter((event): event is ShellCartEvent => event.source === REMOTE_SOURCES.SHELL),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event) => this.handleShellEvent(event));
@@ -26,19 +28,19 @@ export class CartShellBridgeService {
 
   private handleShellEvent(event: ShellCartEvent): void {
     switch (event.type) {
-      case 'add-item':
+      case CART_EVENT_TYPES.ADD_ITEM:
         console.log('[Cart ← Shell] Add item', event.payload);
         break;
 
-      case 'remove-item':
+      case CART_EVENT_TYPES.REMOVE_ITEM:
         console.log('[Cart ← Shell] Remove item', event.payload);
         break;
 
-      case 'clear-cart':
+      case CART_EVENT_TYPES.CLEAR_CART:
         console.log('[Cart ← Shell] Clear cart');
         break;
 
-      case 'sync-cart':
+      case CART_EVENT_TYPES.SYNC_CART:
         console.log('[Cart ← Shell] Sync cart with server');
         break;
 
@@ -52,7 +54,7 @@ export class CartShellBridgeService {
   private publish(event: Omit<CartShellEvent, 'source' | 'timestamp'>): void {
     this.cartChannel?.publish({
       ...event,
-      source: 'cart',
+      source: REMOTE_SOURCES.CART,
       timestamp: Date.now(),
     });
   }

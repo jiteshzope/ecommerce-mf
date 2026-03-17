@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import {
   AUTH_SHELL_CHANNEL,
+  AUTH_EVENT_TYPES,
+  REMOTE_SOURCES,
   type AuthShellEvent,
   type ShellAuthEvent,
 } from '@ecommerce-mf/session';
@@ -16,7 +18,7 @@ export class AuthShellBridgeService {
     // Subscribe to events arriving from the shell
     this.authChannel?.events$
       .pipe(
-        filter((event): event is ShellAuthEvent => event.source === 'shell'),
+        filter((event): event is ShellAuthEvent => event.source === REMOTE_SOURCES.SHELL),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event) => this.handleShellEvent(event));
@@ -26,19 +28,19 @@ export class AuthShellBridgeService {
 
   private handleShellEvent(event: ShellAuthEvent): void {
     switch (event.type) {
-      case 'navigate-to-login':
+      case AUTH_EVENT_TYPES.NAVIGATE_TO_LOGIN:
         console.log('[Auth ← Shell] Navigate to login', event.payload);
         break;
 
-      case 'navigate-to-register':
+      case AUTH_EVENT_TYPES.NAVIGATE_TO_REGISTER:
         console.log('[Auth ← Shell] Navigate to register');
         break;
 
-      case 'session-expired':
+      case AUTH_EVENT_TYPES.SESSION_EXPIRED:
         console.log('[Auth ← Shell] Session expired', event.payload);
         break;
 
-      case 'logout-requested':
+      case AUTH_EVENT_TYPES.LOGOUT_REQUESTED:
         console.log('[Auth ← Shell] Logout requested');
         break;
 
@@ -52,7 +54,7 @@ export class AuthShellBridgeService {
   private publish(event: Omit<AuthShellEvent, 'source' | 'timestamp'>): void {
     this.authChannel?.publish({
       ...event,
-      source: 'auth',
+      source: REMOTE_SOURCES.AUTH,
       timestamp: Date.now(),
     });
   }

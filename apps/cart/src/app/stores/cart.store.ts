@@ -1,8 +1,10 @@
 import { inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { CART_EVENT_TYPES } from '@ecommerce-mf/session';
 import { CartApiService, type CartApiItem } from '../services/cart-api.service';
 import { CartShellBridgeService } from '../services/cart-shell-bridge.service';
+import { CART_MESSAGES } from '../constants/cart-constants';
 
 interface CartState {
   data: CartApiItem[];
@@ -36,7 +38,7 @@ export const CartStore = signalStore(
       } catch {
         patchState(store, {
           loading: false,
-          error: 'Failed to load cart data.',
+          error: CART_MESSAGES.FAILED_TO_LOAD,
           data: [],
           empty: true,
         });

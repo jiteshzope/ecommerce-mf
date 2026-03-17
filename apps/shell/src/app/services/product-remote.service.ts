@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import {
   PRODUCT_SHELL_CHANNEL,
+  PRODUCT_EVENT_TYPES,
+  REMOTE_SOURCES,
   type ProductShellEvent,
   type ShellProductEvent,
 } from '@ecommerce-mf/session';
@@ -17,7 +19,7 @@ export class ProductRemoteService {
   constructor() {
     this.productChannel?.events$
       .pipe(
-        filter((event): event is ProductShellEvent => event.source === 'product'),
+        filter((event): event is ProductShellEvent => event.source === REMOTE_SOURCES.PRODUCT),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event) => this.handleProductEvent(event));
@@ -27,19 +29,19 @@ export class ProductRemoteService {
 
   private handleProductEvent(event: ProductShellEvent): void {
     switch (event.type) {
-      case 'remote-ready':
+      case PRODUCT_EVENT_TYPES.REMOTE_READY:
         console.log('[Shell ← Product] Remote is ready');
         break;
 
-      case 'product-selected':
+      case PRODUCT_EVENT_TYPES.PRODUCT_SELECTED:
         console.log('[Shell ← Product] Product selected', event.payload);
         break;
 
-      case 'product-viewed':
+      case PRODUCT_EVENT_TYPES.PRODUCT_VIEWED:
         console.log('[Shell ← Product] Product viewed', event.payload);
         break;
 
-      case 'add-to-cart-requested':
+      case PRODUCT_EVENT_TYPES.ADD_TO_CART_REQUESTED:
         console.log('[Shell ← Product] Add to cart requested', event.payload);
         break;
 
@@ -55,28 +57,28 @@ export class ProductRemoteService {
   ): void {
     this.productChannel?.publish({
       ...event,
-      source: 'shell',
+      source: REMOTE_SOURCES.SHELL,
       timestamp: Date.now(),
     });
   }
 
   sendLoadProduct(productId: string): void {
     this.publishToProduct({
-      type: 'load-product',
+      type: PRODUCT_EVENT_TYPES.LOAD_PRODUCT,
       payload: { message: 'Load product details', productId },
     });
   }
 
   sendClearSelection(): void {
     this.publishToProduct({
-      type: 'clear-selection',
+      type: PRODUCT_EVENT_TYPES.CLEAR_SELECTION,
       payload: { message: 'Clear current product selection' },
     });
   }
 
   sendFilterByCategory(category: string, query?: string): void {
     this.publishToProduct({
-      type: 'filter-by-category',
+      type: PRODUCT_EVENT_TYPES.FILTER_BY_CATEGORY,
       payload: { message: 'Apply product filter', category, query },
     });
   }
