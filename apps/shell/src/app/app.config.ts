@@ -2,6 +2,7 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import {
   AUTH_SHELL_CHANNEL,
@@ -21,6 +22,7 @@ const productShellChannel = new ShellRemoteChannelService<ProductChannelEvent>()
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideHttpClient(),
     provideRouter(appRoutes),
     { provide: AUTH_SHELL_CHANNEL, useValue: authShellChannel },
     { provide: CART_SHELL_CHANNEL, useValue: cartShellChannel },

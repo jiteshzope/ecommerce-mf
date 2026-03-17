@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RemoteEntry } from './entry';
-import { NxWelcome } from './nx-welcome';
 
 describe('RemoteEntry', () => {
     let component: RemoteEntry;
@@ -19,16 +18,16 @@ describe('RemoteEntry', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should render NxWelcome component', () => {
+    it('should render product remote heading', () => {
         fixture.detectChanges();
-        const welcomeElement = fixture.nativeElement.querySelector('app-nx-welcome');
-        expect(welcomeElement).toBeTruthy();
+        const heading = fixture.nativeElement.querySelector('h2');
+        expect(heading?.textContent).toContain('Product Remote');
     });
 
-    it('should import NxWelcome component', () => {
+    it('should render refresh button', () => {
         fixture.detectChanges();
-        const welcomeElement = fixture.nativeElement.querySelector('app-nx-welcome');
-        expect(welcomeElement).toBeTruthy();
+        const button = fixture.nativeElement.querySelector('button');
+        expect(button?.textContent).toContain('Refresh Product Data');
     });
 
     it('should compile without errors', () => {

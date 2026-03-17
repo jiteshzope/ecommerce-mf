@@ -1,0 +1,19 @@
+<section>
+  <h2>Auth Remote</h2>
+  <button type="button" (click)="store.loadData()">Refresh Auth Data</button>
+
+  @if (store.loading()) {
+    <p>Loading auth data...</p>
+  } @else if (store.error()) {
+    <p>{{ store.error() }}</p>
+    <button type="button" (click)="store.clearError()">Clear Error</button>
+  } @else if (store.empty()) {
+    <p>No auth data found.</p>
+  } @else {
+    <ul>
+      @for (user of store.data(); track user.id) {
+        <li>{{ user.name }} - {{ user.email }}</li>
+      }
+    </ul>
+  }
+</section>

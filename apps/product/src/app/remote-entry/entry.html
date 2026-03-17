@@ -1,0 +1,19 @@
+<section>
+  <h2>Product Remote</h2>
+  <button type="button" (click)="store.loadData()">Refresh Product Data</button>
+
+  @if (store.loading()) {
+    <p>Loading product data...</p>
+  } @else if (store.error()) {
+    <p>{{ store.error() }}</p>
+    <button type="button" (click)="store.clearError()">Clear Error</button>
+  } @else if (store.empty()) {
+    <p>No product data found.</p>
+  } @else {
+    <ul>
+      @for (product of store.data(); track product.id) {
+        <li>{{ product.title }} - {{ product.url }}</li>
+      }
+    </ul>
+  }
+</section>

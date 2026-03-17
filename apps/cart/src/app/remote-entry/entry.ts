@@ -1,16 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CartShellBridgeService } from '../services/cart-shell-bridge.service';
-import { NxWelcome } from './nx-welcome';
+import { CartStore } from '../stores/cart.store';
 
 @Component({
-  imports: [NxWelcome],
+  imports: [],
   selector: 'app-cart-entry',
-  template: `<app-nx-welcome></app-nx-welcome>`,
+  templateUrl: './entry.html',
 })
 export class RemoteEntry implements OnInit {
-  private readonly shellBridge = inject(CartShellBridgeService);
+  readonly store = inject(CartStore) as InstanceType<typeof CartStore>;
 
   ngOnInit(): void {
-    this.shellBridge.publishRemoteReady();
+    this.store.initialize();
   }
 }

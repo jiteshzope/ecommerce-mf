@@ -1,0 +1,19 @@
+<section>
+  <h2>Cart Remote</h2>
+  <button type="button" (click)="store.loadData()">Refresh Cart Data</button>
+
+  @if (store.loading()) {
+    <p>Loading cart data...</p>
+  } @else if (store.error()) {
+    <p>{{ store.error() }}</p>
+    <button type="button" (click)="store.clearError()">Clear Error</button>
+  } @else if (store.empty()) {
+    <p>No cart data found.</p>
+  } @else {
+    <ul>
+      @for (item of store.data(); track item.id) {
+        <li>{{ item.title }} (done: {{ item.completed }})</li>
+      }
+    </ul>
+  }
+</section>
