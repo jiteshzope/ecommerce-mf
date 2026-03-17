@@ -1,8 +1,8 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import {
   PRODUCT_SHELL_CHANNEL,
-  SHELL_PRODUCT_CHANNEL,
   type ProductShellEvent,
   type ShellProductEvent,
 } from '@ecommerce-mf/session';
@@ -12,15 +12,15 @@ export class ProductShellBridgeService {
   private readonly productChannel = inject(PRODUCT_SHELL_CHANNEL, {
     optional: true,
   });
-  private readonly shellProductChannel = inject(SHELL_PRODUCT_CHANNEL, {
-    optional: true,
-  });
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     // Subscribe to events arriving from the shell
-    this.shellProductChannel?.events$
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.productChannel?.events$
+      .pipe(
+        filter((event): event is ShellProductEvent => event.source === 'shell'),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((event) => this.handleShellEvent(event));
   }
 

@@ -1,8 +1,8 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import {
   CART_SHELL_CHANNEL,
-  SHELL_CART_CHANNEL,
   type CartShellEvent,
   type ShellCartEvent,
 } from '@ecommerce-mf/session';
@@ -10,15 +10,15 @@ import {
 @Injectable({ providedIn: 'root' })
 export class CartShellBridgeService {
   private readonly cartChannel = inject(CART_SHELL_CHANNEL, { optional: true });
-  private readonly shellCartChannel = inject(SHELL_CART_CHANNEL, {
-    optional: true,
-  });
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     // Subscribe to events arriving from the shell
-    this.shellCartChannel?.events$
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.cartChannel?.events$
+      .pipe(
+        filter((event): event is ShellCartEvent => event.source === 'shell'),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((event) => this.handleShellEvent(event));
   }
 

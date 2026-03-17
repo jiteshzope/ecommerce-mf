@@ -1,8 +1,8 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import {
   AUTH_SHELL_CHANNEL,
-  SHELL_AUTH_CHANNEL,
   type AuthShellEvent,
   type ShellAuthEvent,
 } from '@ecommerce-mf/session';
@@ -10,15 +10,15 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AuthShellBridgeService {
   private readonly authChannel = inject(AUTH_SHELL_CHANNEL, { optional: true });
-  private readonly shellAuthChannel = inject(SHELL_AUTH_CHANNEL, {
-    optional: true,
-  });
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     // Subscribe to events arriving from the shell
-    this.shellAuthChannel?.events$
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.authChannel?.events$
+      .pipe(
+        filter((event): event is ShellAuthEvent => event.source === 'shell'),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((event) => this.handleShellEvent(event));
   }
 

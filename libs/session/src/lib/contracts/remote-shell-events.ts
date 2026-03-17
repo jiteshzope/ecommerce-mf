@@ -59,6 +59,10 @@ export type ShellProductEvent = BaseShellEvent<
   }
 >;
 
+export type AuthChannelEvent = AuthShellEvent | ShellAuthEvent;
+export type CartChannelEvent = CartShellEvent | ShellCartEvent;
+export type ProductChannelEvent = ProductShellEvent | ShellProductEvent;
+
 export type AnyShellEvent =
   | AuthShellEvent
   | CartShellEvent

@@ -1,22 +1,23 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import {
   AUTH_SHELL_CHANNEL,
-  SHELL_AUTH_CHANNEL,
   type AuthShellEvent,
+  type ShellAuthEvent,
 } from '@ecommerce-mf/session';
 
 @Injectable({ providedIn: 'root' })
 export class AuthRemoteService {
   private readonly authChannel = inject(AUTH_SHELL_CHANNEL, { optional: true });
-  private readonly shellAuthChannel = inject(SHELL_AUTH_CHANNEL, {
-    optional: true,
-  });
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     this.authChannel?.events$
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        filter((event): event is AuthShellEvent => event.source === 'auth'),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((event) => this.handleAuthEvent(event));
   }
 
@@ -51,38 +52,38 @@ export class AuthRemoteService {
 
   // ─── Send events to auth remote ─────────────────────────────────────────────
 
-  sendNavigateToLogin(redirectUrl?: string): void {
-    this.shellAuthChannel?.publish({
-      type: 'navigate-to-login',
+  private publishToAuth(event: Omit<ShellAuthEvent, 'source' | 'timestamp'>): void {
+    this.authChannel?.publish({
+      ...event,
       source: 'shell',
       timestamp: Date.now(),
+    });
+  }
+
+  sendNavigateToLogin(redirectUrl?: string): void {
+    this.publishToAuth({
+      type: 'navigate-to-login',
       payload: { message: 'Navigate to the login page', redirectUrl },
     });
   }
 
   sendNavigateToRegister(): void {
-    this.shellAuthChannel?.publish({
+    this.publishToAuth({
       type: 'navigate-to-register',
-      source: 'shell',
-      timestamp: Date.now(),
       payload: { message: 'Navigate to the register page' },
     });
   }
 
   sendSessionExpired(redirectUrl?: string): void {
-    this.shellAuthChannel?.publish({
+    this.publishToAuth({
       type: 'session-expired',
-      source: 'shell',
-      timestamp: Date.now(),
       payload: { message: 'Session has expired, please log in again', redirectUrl },
     });
   }
 
   sendLogoutRequested(): void {
-    this.shellAuthChannel?.publish({
+    this.publishToAuth({
       type: 'logout-requested',
-      source: 'shell',
-      timestamp: Date.now(),
       payload: { message: 'Logout requested by shell' },
     });
   }

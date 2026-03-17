@@ -1,22 +1,23 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import {
   CART_SHELL_CHANNEL,
-  SHELL_CART_CHANNEL,
   type CartShellEvent,
+  type ShellCartEvent,
 } from '@ecommerce-mf/session';
 
 @Injectable({ providedIn: 'root' })
 export class CartRemoteService {
   private readonly cartChannel = inject(CART_SHELL_CHANNEL, { optional: true });
-  private readonly shellCartChannel = inject(SHELL_CART_CHANNEL, {
-    optional: true,
-  });
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     this.cartChannel?.events$
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        filter((event): event is CartShellEvent => event.source === 'cart'),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((event) => this.handleCartEvent(event));
   }
 
@@ -47,38 +48,38 @@ export class CartRemoteService {
 
   // ─── Send events to cart remote ─────────────────────────────────────────────
 
-  sendAddItem(productId: string, quantity: number): void {
-    this.shellCartChannel?.publish({
-      type: 'add-item',
+  private publishToCart(event: Omit<ShellCartEvent, 'source' | 'timestamp'>): void {
+    this.cartChannel?.publish({
+      ...event,
       source: 'shell',
       timestamp: Date.now(),
+    });
+  }
+
+  sendAddItem(productId: string, quantity: number): void {
+    this.publishToCart({
+      type: 'add-item',
       payload: { message: 'Add item to cart', productId, quantity },
     });
   }
 
   sendRemoveItem(productId: string): void {
-    this.shellCartChannel?.publish({
+    this.publishToCart({
       type: 'remove-item',
-      source: 'shell',
-      timestamp: Date.now(),
       payload: { message: 'Remove item from cart', productId },
     });
   }
 
   sendClearCart(): void {
-    this.shellCartChannel?.publish({
+    this.publishToCart({
       type: 'clear-cart',
-      source: 'shell',
-      timestamp: Date.now(),
       payload: { message: 'Clear the entire cart' },
     });
   }
 
   sendSyncCart(): void {
-    this.shellCartChannel?.publish({
+    this.publishToCart({
       type: 'sync-cart',
-      source: 'shell',
-      timestamp: Date.now(),
       payload: { message: 'Sync cart state with server' },
     });
   }
