@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthRemoteService } from './services/auth-remote.service';
 import { ShellHeaderComponent } from './components/shell-header/shell-header.component';
@@ -10,7 +10,7 @@ import { ShellStore } from './stores/shell.store';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements OnInit {
+export class App {
   protected title = 'shell';
 
   readonly store = inject(ShellStore) as InstanceType<typeof ShellStore>;
@@ -29,7 +29,4 @@ export class App implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    void this.store.loadData();
-  }
 }
