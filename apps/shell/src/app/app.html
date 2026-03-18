@@ -1,31 +1,3 @@
-<ul class="remote-menu">
-  <li><a routerLink="/">Home</a></li>
-  <li><a routerLink="product">Product</a></li>
-  <li><a routerLink="cart">Cart</a></li>
-  <li><a routerLink="auth">Auth</a></li>
-</ul>
-
-<section>
-  <h2>Shell Dashboard</h2>
-  <button type="button" (click)="store.loadData()">Refresh Shell Data</button>
-  <button type="button" (click)="store.sendAuthLoginRedirect()">Send Auth Event</button>
-  <button type="button" (click)="store.addDemoCartItem()">Send Cart Event</button>
-  <button type="button" (click)="store.loadDemoProduct()">Send Product Event</button>
-
-  @if (store.loading()) {
-    <p>Loading shell data...</p>
-  } @else if (store.error()) {
-    <p>{{ store.error() }}</p>
-    <button type="button" (click)="store.clearError()">Clear Error</button>
-  } @else if (store.empty()) {
-    <p>No shell data found.</p>
-  } @else {
-    <ul>
-      @for (item of store.data(); track item.id) {
-        <li>{{ item.name }} ({{ item.email }})</li>
-      }
-    </ul>
-  }
-</section>
+<app-shell-header></app-shell-header>
 
 <router-outlet></router-outlet>

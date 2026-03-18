@@ -1,1 +1,59 @@
-<p>login works!</p>
+<section class="auth-card">
+	<header>
+		<h2>Sign in</h2>
+		<p>Use your account credentials to access your session.</p>
+	</header>
+
+	<form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" novalidate>
+		<div class="field">
+			<label for="email">Email</label>
+			<input
+				id="email"
+				type="email"
+				name="email"
+				autocomplete="email"
+				required
+				email
+				[ngModel]="email()"
+				(ngModelChange)="email.set($event)"
+				#emailCtrl="ngModel"
+			/>
+			@if ((emailCtrl.touched || hasAttemptedSubmit()) && emailCtrl.invalid) {
+				<p class="error-text">Enter a valid email address.</p>
+			}
+		</div>
+
+		<div class="field">
+			<label for="password">Password</label>
+			<input
+				id="password"
+				type="password"
+				name="password"
+				autocomplete="current-password"
+				required
+				minlength="8"
+				maxlength="64"
+				[ngModel]="password()"
+				(ngModelChange)="password.set($event)"
+				#passwordCtrl="ngModel"
+			/>
+			@if ((passwordCtrl.touched || hasAttemptedSubmit()) && passwordCtrl.errors?.['required']) {
+				<p class="error-text">Password is required.</p>
+			}
+			@if ((passwordCtrl.touched || hasAttemptedSubmit()) && passwordCtrl.errors?.['minlength']) {
+				<p class="error-text">Password must be at least 8 characters.</p>
+			}
+		</div>
+
+		@if (store.error()) {
+			<div class="alert-error" role="alert" aria-live="polite">
+				<p>{{ store.error() }}</p>
+				<button type="button" class="link-btn" (click)="clearError()">Dismiss</button>
+			</div>
+		}
+
+		<button type="submit" [disabled]="loginForm.invalid || store.isSubmitting()">
+			{{ store.isSubmitting() ? 'Signing in...' : 'Login' }}
+		</button>
+	</form>
+</section>

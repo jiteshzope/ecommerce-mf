@@ -3,14 +3,17 @@
  */
 
 export const AUTH_APP_LABELS = {
-  TITLE: 'Auth Remote',
-  REFRESH_BUTTON: 'Refresh Auth Data',
-  LOADING: 'Loading auth data...',
-  NO_DATA: 'No auth data found.',
+  TITLE: 'Authentication',
+  LOGIN_TITLE: 'Sign in',
+  REGISTER_TITLE: 'Create account',
 } as const;
 
 export const AUTH_MESSAGES = {
-  FAILED_TO_LOAD: 'Failed to load auth data.',
   REMOTE_READY: 'Auth remote is ready',
-  DEMO_EMAIL: 'demo@local.dev',
+  INVALID_LOGIN: 'Invalid email or password.',
+  EMAIL_IN_USE: 'An account with this email already exists.',
+  REGISTER_FAILED: 'Unable to register at the moment. Please try again.',
+  SESSION_RESTORED: 'Session restored from browser storage.',
 } as const;
+
+

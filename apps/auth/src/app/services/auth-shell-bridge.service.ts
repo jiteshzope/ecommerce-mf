@@ -1,55 +1,17 @@
-import { DestroyRef, Injectable, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
+﻿import { Injectable, inject } from '@angular/core';
 import {
   AUTH_SHELL_CHANNEL,
   AUTH_EVENT_TYPES,
   REMOTE_SOURCES,
+  SessionState,
   type AuthShellEvent,
-  type ShellAuthEvent,
 } from '@ecommerce-mf/session';
 
 @Injectable({ providedIn: 'root' })
 export class AuthShellBridgeService {
   private readonly authChannel = inject(AUTH_SHELL_CHANNEL, { optional: true });
-  private readonly destroyRef = inject(DestroyRef);
 
-  constructor() {
-    // Subscribe to events arriving from the shell
-    this.authChannel?.events$
-      .pipe(
-        filter((event): event is ShellAuthEvent => event.source === REMOTE_SOURCES.SHELL),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((event) => this.handleShellEvent(event));
-  }
-
-  // ─── Receive events from shell ───────────────────────────────────────────────
-
-  private handleShellEvent(event: ShellAuthEvent): void {
-    switch (event.type) {
-      case AUTH_EVENT_TYPES.NAVIGATE_TO_LOGIN:
-        console.log('[Auth ← Shell] Navigate to login', event.payload);
-        break;
-
-      case AUTH_EVENT_TYPES.NAVIGATE_TO_REGISTER:
-        console.log('[Auth ← Shell] Navigate to register');
-        break;
-
-      case AUTH_EVENT_TYPES.SESSION_EXPIRED:
-        console.log('[Auth ← Shell] Session expired', event.payload);
-        break;
-
-      case AUTH_EVENT_TYPES.LOGOUT_REQUESTED:
-        console.log('[Auth ← Shell] Logout requested');
-        break;
-
-      default:
-        console.log('[Auth ← Shell] Unknown event type:', event.type, event.payload);
-    }
-  }
-
-  // ─── Send events to shell ────────────────────────────────────────────────────
+  // --- Send events to shell ----------------------------------------------------
 
   private publish(event: Omit<AuthShellEvent, 'source' | 'timestamp'>): void {
     this.authChannel?.publish({
@@ -61,36 +23,46 @@ export class AuthShellBridgeService {
 
   publishRemoteReady(): void {
     this.publish({
-      type: 'remote-ready',
+      type: AUTH_EVENT_TYPES.REMOTE_READY,
       payload: { message: 'Auth remote is ready' },
     });
   }
 
-  publishLoginSuccess(email: string): void {
+  publishLoginSuccess(email: string, session: SessionState, message = 'Login succeeded'): void {
     this.publish({
-      type: 'login-success',
-      payload: { message: 'Login succeeded', email },
+      type: AUTH_EVENT_TYPES.LOGIN_SUCCESS,
+      payload: {
+        message,
+        email,
+        session,
+        authorizationHeader: `Bearer ${session.token}`,
+      },
     });
   }
 
   publishLoginFailed(): void {
     this.publish({
-      type: 'login-failed',
+      type: AUTH_EVENT_TYPES.LOGIN_FAILED,
       payload: { message: 'Login failed, invalid credentials' },
     });
   }
 
   publishLogout(email?: string): void {
     this.publish({
-      type: 'logout',
+      type: AUTH_EVENT_TYPES.LOGOUT,
       payload: { message: 'User logged out', email },
     });
   }
 
-  publishRegisterSuccess(email: string): void {
+  publishRegisterSuccess(email: string, session: SessionState): void {
     this.publish({
-      type: 'register-success',
-      payload: { message: 'Registration succeeded', email },
+      type: AUTH_EVENT_TYPES.REGISTER_SUCCESS,
+      payload: {
+        message: 'Registration succeeded and user signed in',
+        email,
+        session,
+        authorizationHeader: `Bearer ${session.token}`,
+      },
     });
   }
 }

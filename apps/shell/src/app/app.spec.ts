@@ -26,14 +26,14 @@ describe('App', () => {
     expect(app.title).toEqual('shell');
   });
 
-  it('should render title', async () => {
+  it('should render shell header title', async () => {
     const fixture = TestBed.createComponent(App);
     const router = TestBed.inject(Router);
     await router.navigate(['']);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Welcome shell',
+      'Ecommerce Shell',
     );
   });
 });

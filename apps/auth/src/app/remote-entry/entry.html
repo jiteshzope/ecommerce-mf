@@ -1,19 +1,8 @@
-<section>
-  <h2>Auth Remote</h2>
-  <button type="button" (click)="store.loadData()">Refresh Auth Data</button>
+<section class="auth-page">
+  <header class="auth-header">
+    <h1>Authentication</h1>
+    <p>Sign in or create an account from the shell header.</p>
+  </header>
 
-  @if (store.loading()) {
-    <p>Loading auth data...</p>
-  } @else if (store.error()) {
-    <p>{{ store.error() }}</p>
-    <button type="button" (click)="store.clearError()">Clear Error</button>
-  } @else if (store.empty()) {
-    <p>No auth data found.</p>
-  } @else {
-    <ul>
-      @for (user of store.data(); track user.id) {
-        <li>{{ user.name }} - {{ user.email }}</li>
-      }
-    </ul>
-  }
+  <router-outlet />
 </section>

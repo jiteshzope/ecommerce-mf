@@ -1,3 +1,5 @@
+import type { SessionState } from './session-state';
+
 export interface BaseShellEvent<TSource extends string, TPayload> {
   source: TSource;
   type: string;
@@ -10,6 +12,8 @@ export type AuthShellEvent = BaseShellEvent<
   {
     message: string;
     email?: string;
+    session?: SessionState;
+    authorizationHeader?: string;
   }
 >;
 
@@ -26,15 +30,6 @@ export type ProductShellEvent = BaseShellEvent<
   {
     message: string;
     productId?: string;
-  }
->;
-
-// Shell -> Auth remote events
-export type ShellAuthEvent = BaseShellEvent<
-  'shell',
-  {
-    message: string;
-    redirectUrl?: string;
   }
 >;
 
@@ -59,7 +54,7 @@ export type ShellProductEvent = BaseShellEvent<
   }
 >;
 
-export type AuthChannelEvent = AuthShellEvent | ShellAuthEvent;
+export type AuthChannelEvent = AuthShellEvent;
 export type CartChannelEvent = CartShellEvent | ShellCartEvent;
 export type ProductChannelEvent = ProductShellEvent | ShellProductEvent;
 
@@ -67,6 +62,5 @@ export type AnyShellEvent =
   | AuthShellEvent
   | CartShellEvent
   | ProductShellEvent
-  | ShellAuthEvent
   | ShellCartEvent
   | ShellProductEvent;

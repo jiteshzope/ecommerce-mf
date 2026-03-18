@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { AuthStore } from '../stores/auth.store';
 
 @Component({
-  imports: [],
+  imports: [RouterOutlet],
   selector: 'app-auth-entry',
   templateUrl: './entry.html',
 })

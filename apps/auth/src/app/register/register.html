@@ -1,1 +1,126 @@
-<p>register works!</p>
+<section class="auth-card">
+	<header>
+		<h2>Create account</h2>
+		<p>Register a new account before signing in.</p>
+	</header>
+
+	<form #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)" novalidate>
+		<div class="field">
+			<label for="name">Full name</label>
+			<input
+				id="name"
+				type="text"
+				name="name"
+				autocomplete="name"
+				required
+				minlength="2"
+				maxlength="70"
+				[ngModel]="name()"
+				(ngModelChange)="name.set($event)"
+				#nameCtrl="ngModel"
+			/>
+			@if ((nameCtrl.touched || hasAttemptedSubmit()) && nameCtrl.errors?.['required']) {
+				<p class="error-text">Name is required.</p>
+			}
+			@if ((nameCtrl.touched || hasAttemptedSubmit()) && nameCtrl.errors?.['minlength']) {
+				<p class="error-text">Name must be at least 2 characters.</p>
+			}
+		</div>
+
+		<div class="field">
+			<label for="email">Email</label>
+			<input
+				id="email"
+				type="email"
+				name="email"
+				autocomplete="email"
+				required
+				email
+				[ngModel]="email()"
+				(ngModelChange)="email.set($event)"
+				#emailCtrl="ngModel"
+			/>
+			@if ((emailCtrl.touched || hasAttemptedSubmit()) && emailCtrl.invalid) {
+				<p class="error-text">Enter a valid email address.</p>
+			}
+		</div>
+
+		<div class="field">
+			<label for="phoneNumber">Phone number</label>
+			<input
+				id="phoneNumber"
+				type="tel"
+				name="phoneNumber"
+				autocomplete="tel"
+				required
+				pattern="^\+?[1-9][0-9]{9,14}$"
+				[ngModel]="phoneNumber()"
+				(ngModelChange)="phoneNumber.set($event)"
+				#phoneNumberCtrl="ngModel"
+			/>
+			@if ((phoneNumberCtrl.touched || hasAttemptedSubmit()) && phoneNumberCtrl.errors?.['required']) {
+				<p class="error-text">Phone number is required.</p>
+			}
+			@if ((phoneNumberCtrl.touched || hasAttemptedSubmit()) && phoneNumberCtrl.errors?.['pattern']) {
+				<p class="error-text">Use an international format like +12345678901.</p>
+			}
+		</div>
+
+		<div class="field">
+			<label for="password">Password</label>
+			<input
+				id="password"
+				type="password"
+				name="password"
+				autocomplete="new-password"
+				required
+				minlength="8"
+				maxlength="64"
+				pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$"
+				[ngModel]="password()"
+				(ngModelChange)="password.set($event)"
+				#passwordCtrl="ngModel"
+			/>
+			@if ((passwordCtrl.touched || hasAttemptedSubmit()) && passwordCtrl.errors?.['required']) {
+				<p class="error-text">Password is required.</p>
+			}
+			@if ((passwordCtrl.touched || hasAttemptedSubmit()) && passwordCtrl.errors?.['minlength']) {
+				<p class="error-text">Password must be at least 8 characters.</p>
+			}
+			@if ((passwordCtrl.touched || hasAttemptedSubmit()) && passwordCtrl.errors?.['pattern']) {
+				<p class="error-text">Use upper/lowercase letters and at least one number.</p>
+			}
+		</div>
+
+		<div class="field">
+			<label for="confirmPassword">Confirm password</label>
+			<input
+				id="confirmPassword"
+				type="password"
+				name="confirmPassword"
+				autocomplete="new-password"
+				required
+				[ngModel]="confirmPassword()"
+				(ngModelChange)="confirmPassword.set($event)"
+				#confirmPasswordCtrl="ngModel"
+			/>
+			@if ((confirmPasswordCtrl.touched || hasAttemptedSubmit()) && confirmPasswordCtrl.errors?.['required']) {
+				<p class="error-text">Please confirm your password.</p>
+			}
+			@if (passwordsDoNotMatch()) {
+				<p class="error-text">Passwords do not match.</p>
+			}
+		</div>
+
+		@if (store.error()) {
+			<div class="alert-error" role="alert" aria-live="polite">
+				<p>{{ store.error() }}</p>
+				<button type="button" class="link-btn" (click)="clearError()">Dismiss</button>
+			</div>
+		}
+
+		<button type="submit" [disabled]="registerForm.invalid || passwordsDoNotMatch() || store.isSubmitting()">
+			{{ store.isSubmitting() ? 'Creating account...' : 'Register' }}
+		</button>
+	</form>
+</section>

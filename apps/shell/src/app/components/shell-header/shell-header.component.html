@@ -1,0 +1,25 @@
+<header class="shell-header">
+  <div class="brand-area">
+    <h1>Ecommerce Shell</h1>
+    <p>Micro-frontend host</p>
+  </div>
+
+  <nav aria-label="Primary navigation" class="main-nav">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+    <a routerLink="/product" routerLinkActive="active">Product</a>
+    <a routerLink="/cart" routerLinkActive="active">Cart</a>
+  </nav>
+
+  <div class="auth-actions">
+    @if (store.isAuthenticated()) {
+      <div class="signed-in-user">
+        <span>{{ store.user()?.name }}</span>
+        <small>{{ store.user()?.email }}</small>
+      </div>
+      <button type="button" (click)="store.logout()">Logout</button>
+    } @else {
+      <button type="button" (click)="store.goToLogin()">Login</button>
+      <button type="button" class="secondary" (click)="store.goToRegister()">Register</button>
+    }
+  </div>
+</header>
