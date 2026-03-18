@@ -41,6 +41,11 @@
           "env": "NX_MF_DEV_REMOTES"
         }
       ]
+    },
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "plugins": [
