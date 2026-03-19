@@ -1,0 +1,61 @@
+<section class="product-details-wrap">
+  <a class="ghost-link back-link" routerLink="/product">{{ labels.BACK_TO_LIST }}</a>
+
+  @if (store.addToCartError()) {
+    <aside class="state-banner state-banner--error">
+      <p>{{ store.addToCartError() }}</p>
+      <button type="button" (click)="store.clearAddToCartMessage()">Dismiss</button>
+    </aside>
+  }
+
+  @if (store.addToCartSuccess()) {
+    <aside class="state-banner state-banner--success">
+      <p>{{ store.addToCartSuccess() }}</p>
+      <button type="button" (click)="store.clearAddToCartMessage()">Dismiss</button>
+    </aside>
+  }
+
+  @if (store.detailsLoading()) {
+    <article class="product-detail-card skeleton-card">
+      <div class="detail-media skeleton-media"></div>
+      <div class="detail-meta">
+        <div class="skeleton-line skeleton-line--title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+      </div>
+    </article>
+  } @else if (store.detailsError()) {
+    <section class="state-panel state-panel--error">
+      <h2>Unable To Load Product</h2>
+      <p>{{ store.detailsError() }}</p>
+      <div class="state-actions">
+        <button type="button" (click)="onRetryDetails()">Try Again</button>
+        <button type="button" (click)="store.clearDetailsError()">Clear Message</button>
+      </div>
+    </section>
+  } @else if (store.selectedProduct(); as product) {
+    <article class="product-detail-card">
+      <div class="detail-media">
+        <img [src]="product.url" [alt]="product.title" />
+      </div>
+
+      <div class="detail-meta">
+        <h2>{{ product.title }}</h2>
+        <p class="detail-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</p>
+        <p class="detail-description">{{ product.description }}</p>
+
+        <button
+          type="button"
+          (click)="onAddToCart()"
+          [disabled]="store.isAddToCartLoading(product.id.toString())"
+        >
+          @if (store.isAddToCartLoading(product.id.toString())) {
+            {{ labels.ADDING_TO_CART }}
+          } @else {
+            {{ labels.ADD_TO_CART }}
+          }
+        </button>
+      </div>
+    </article>
+  }
+</section>

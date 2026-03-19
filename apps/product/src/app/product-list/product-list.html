@@ -1,0 +1,79 @@
+<section class="catalog-content">
+  @if (store.addToCartError()) {
+    <aside class="state-banner state-banner--error">
+      <p>{{ store.addToCartError() }}</p>
+      <button type="button" (click)="store.clearAddToCartMessage()">Dismiss</button>
+    </aside>
+  }
+
+  @if (store.addToCartSuccess()) {
+    <aside class="state-banner state-banner--success">
+      <p>{{ store.addToCartSuccess() }}</p>
+      <button type="button" (click)="store.clearAddToCartMessage()">Dismiss</button>
+    </aside>
+  }
+
+  @if (store.listLoading()) {
+    <section class="catalog-grid catalog-grid--skeleton" aria-label="Loading products">
+      @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
+        <article class="product-card skeleton-card">
+          <div class="skeleton-media"></div>
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line"></div>
+        </article>
+      }
+    </section>
+  } @else if (store.listError()) {
+    <section class="state-panel state-panel--error">
+      <h2>Catalog Unavailable</h2>
+      <p>{{ store.listError() }}</p>
+      <div class="state-actions">
+        <button type="button" (click)="store.loadProducts()">{{ labels.REFRESH_BUTTON }}</button>
+        <button type="button" (click)="store.clearListError()">Clear Message</button>
+      </div>
+    </section>
+  } @else if (store.empty()) {
+    <section class="state-panel">
+      <h2>Nothing Here Yet</h2>
+      <p>{{ labels.NO_DATA }}</p>
+      <button type="button" (click)="store.loadProducts()">{{ labels.REFRESH_BUTTON }}</button>
+    </section>
+  } @else {
+    <section class="catalog-grid">
+      @for (product of store.products(); track product.id) {
+        <article class="product-card">
+          <a
+            class="product-media"
+            [routerLink]="[product.id]"
+            (click)="onSelectProduct(product.id)"
+            [attr.aria-label]="'View details for ' + product.title"
+          >
+            <img [src]="product.url" [alt]="product.title" loading="lazy" />
+          </a>
+
+          <div class="product-meta">
+            <h3>{{ product.title }}</h3>
+            <p>{{ product.price | currency:'USD':'symbol':'1.2-2' }}</p>
+          </div>
+
+          <div class="product-actions">
+            <a class="ghost-link" [routerLink]="[product.id]" (click)="onSelectProduct(product.id)">
+              {{ labels.VIEW_DETAILS }}
+            </a>
+            <button
+              type="button"
+              (click)="onAddToCart(product.id)"
+              [disabled]="store.isAddToCartLoading(product.id.toString())"
+            >
+              @if (store.isAddToCartLoading(product.id.toString())) {
+                {{ labels.ADDING_TO_CART }}
+              } @else {
+                {{ labels.ADD_TO_CART }}
+              }
+            </button>
+          </div>
+        </article>
+      }
+    </section>
+  }
+</section>
