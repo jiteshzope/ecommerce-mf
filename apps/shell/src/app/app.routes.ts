@@ -1,4 +1,3 @@
-import { NxWelcome } from './nx-welcome';
 import { Route } from '@angular/router';
 
 export const appRoutes: Route[] = [
@@ -16,6 +15,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: '',
-    component: NxWelcome,
+    pathMatch: 'full',
+    redirectTo: 'product',
   },
 ];
