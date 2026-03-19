@@ -22,6 +22,7 @@ export class App {
 
       if (session?.isAuthenticated) {
         this.store.setAuthSession(session);
+        void this.store.loadCartItemCount();
         return;
       }
 

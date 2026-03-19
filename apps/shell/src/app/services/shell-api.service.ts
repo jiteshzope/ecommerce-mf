@@ -1,20 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-export interface ShellDashboardItem {
+interface ShellCartApiItem {
   id: number;
-  name: string;
-  email: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ShellApiService {
   private readonly http = inject(HttpClient);
 
-  getDashboardData(): Observable<ShellDashboardItem[]> {
-    return this.http.get<ShellDashboardItem[]>(
-      'https://jsonplaceholder.typicode.com/users?_limit=5',
-    );
+  getCartItemCount(): Observable<number> {
+    return this.http
+      .get<ShellCartApiItem[]>('https://jsonplaceholder.typicode.com/todos?_limit=6')
+      .pipe(map((items) => items.length));
   }
 }
