@@ -1,4 +1,5 @@
 import { Route } from '@angular/router';
+import { cartAuthGuard } from './guards/cart-auth.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -7,6 +8,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'cart',
+    canMatch: [cartAuthGuard],
     loadChildren: () => import('cart/Routes').then((m) => m!.remoteRoutes),
   },
   {

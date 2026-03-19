@@ -64,7 +64,7 @@ export const ShellStore = signalStore(
         }
 
         try {
-          const cartItemCount = await firstValueFrom(shellApi.getCartItemCount());
+          const cartItemCount = await firstValueFrom(shellApi.getCartItemCount(store.token()!));
 
           if (!store.isAuthenticated()) {
             return;
@@ -104,7 +104,7 @@ export const ShellStore = signalStore(
           token: null,
           cartItemCount: 0,
         });
-        void router.navigateByUrl('/');
+        void router.navigateByUrl('/product');
       },
     }),
   ),

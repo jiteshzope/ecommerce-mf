@@ -1,15 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CartStore } from '../stores/cart.store';
+import { Component } from '@angular/core';
+import { CartItemsListComponent } from '../components/cart-items-list/cart-items-list.component';
 
 @Component({
-  imports: [],
+  imports: [CartItemsListComponent],
   selector: 'app-cart-entry',
   templateUrl: './entry.html',
 })
-export class RemoteEntry implements OnInit {
-  readonly store = inject(CartStore) as InstanceType<typeof CartStore>;
-
-  ngOnInit(): void {
-    this.store.initialize();
-  }
-}
+export class RemoteEntry {}
