@@ -45,7 +45,6 @@
           <a
             class="product-media"
             [routerLink]="[product.id]"
-            (click)="onSelectProduct(product.id)"
             [attr.aria-label]="'View details for ' + product.title"
           >
             <img [src]="product.url" [alt]="product.title" loading="lazy" />
@@ -57,7 +56,7 @@
           </div>
 
           <div class="product-actions">
-            <a class="ghost-link" [routerLink]="[product.id]" (click)="onSelectProduct(product.id)">
+            <a class="ghost-link" [routerLink]="[product.id]">
               {{ labels.VIEW_DETAILS }}
             </a>
             <button

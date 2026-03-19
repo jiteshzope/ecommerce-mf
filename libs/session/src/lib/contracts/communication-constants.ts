@@ -54,9 +54,6 @@ export const CART_EVENT_TYPES = {
 export const PRODUCT_EVENT_TYPES = {
   // Remote → Shell
   REMOTE_READY: 'remote-ready',
-  PRODUCT_SELECTED: 'product-selected',
-  PRODUCT_VIEWED: 'product-viewed',
-  ADD_TO_CART_REQUESTED: 'add-to-cart-requested',
 
   // Shell → Remote
   LOAD_PRODUCT: 'load-product',

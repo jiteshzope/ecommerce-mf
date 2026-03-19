@@ -29,7 +29,6 @@ export class ProductDetails implements OnInit {
       }
 
       this.selectedId = productId;
-      this.store.markProductSelected(productId);
       void this.store.loadProductDetails(productId);
     });
   }

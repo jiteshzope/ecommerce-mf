@@ -108,7 +108,6 @@ export const ProductStore = signalStore(
           selectedProduct,
           detailsLoading: false,
         });
-        bridge.publishProductViewed(String(selectedProduct.id));
       } catch (error) {
         const errorCode = readErrorCode(error);
         patchState(store, {
@@ -143,7 +142,6 @@ export const ProductStore = signalStore(
       }
 
       withAddToCartLoading(productId, true);
-      bridge.publishAddToCartRequested(productId);
 
       try {
         const response = await firstValueFrom(
@@ -173,10 +171,6 @@ export const ProductStore = signalStore(
 
       isAddToCartLoading(productId: string): boolean {
         return store.addToCartLoadingIds().includes(productId);
-      },
-
-      markProductSelected(productId: string): void {
-        bridge.publishProductSelected(productId);
       },
 
       initialize(): void {

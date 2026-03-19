@@ -23,8 +23,4 @@ export class ProductList implements OnInit {
   async onAddToCart(productId: number): Promise<void> {
     await this.store.addToCart(String(productId), 1);
   }
-
-  onSelectProduct(productId: number): void {
-    this.store.markProductSelected(String(productId));
-  }
 }

@@ -63,25 +63,4 @@ export class ProductShellBridgeService {
       payload: { message: 'Product remote is ready' },
     });
   }
-
-  publishProductSelected(productId: string): void {
-    this.publish({
-      type: 'product-selected',
-      payload: { message: 'Product selected by user', productId },
-    });
-  }
-
-  publishProductViewed(productId: string): void {
-    this.publish({
-      type: 'product-viewed',
-      payload: { message: 'Product detail page viewed', productId },
-    });
-  }
-
-  publishAddToCartRequested(productId: string): void {
-    this.publish({
-      type: 'add-to-cart-requested',
-      payload: { message: 'User requested add to cart', productId },
-    });
-  }
 }

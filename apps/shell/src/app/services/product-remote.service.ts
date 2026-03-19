@@ -33,18 +33,6 @@ export class ProductRemoteService {
         console.log('[Shell ← Product] Remote is ready');
         break;
 
-      case PRODUCT_EVENT_TYPES.PRODUCT_SELECTED:
-        console.log('[Shell ← Product] Product selected', event.payload);
-        break;
-
-      case PRODUCT_EVENT_TYPES.PRODUCT_VIEWED:
-        console.log('[Shell ← Product] Product viewed', event.payload);
-        break;
-
-      case PRODUCT_EVENT_TYPES.ADD_TO_CART_REQUESTED:
-        console.log('[Shell ← Product] Add to cart requested', event.payload);
-        break;
-
       default:
         console.log('[Shell ← Product] Unknown event type:', event.type, event.payload);
     }
