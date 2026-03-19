@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { LoginRequest, SessionState, SESSION_STORAGE_KEYS } from '@ecommerce-mf/session';
@@ -98,6 +99,19 @@ export const AuthStore = signalStore(
       });
     };
 
+    const readErrorCode = (error: unknown): string | null => {
+      if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
+        const payload = error.error as { message?: unknown };
+        return typeof payload.message === 'string' ? payload.message : null;
+      }
+
+      if (error instanceof Error) {
+        return error.message;
+      }
+
+      return null;
+    };
+
     return {
       initialize(): void {
         bridge.publishRemoteReady();
@@ -162,8 +176,9 @@ export const AuthStore = signalStore(
           );
           return true;
         } catch (error) {
+          const errorCode = readErrorCode(error);
           const message =
-            error instanceof Error && error.message === 'EMAIL_IN_USE'
+            errorCode === 'EMAIL_IN_USE'
               ? AUTH_MESSAGES.EMAIL_IN_USE
               : AUTH_MESSAGES.REGISTER_FAILED;
 
@@ -173,6 +188,15 @@ export const AuthStore = signalStore(
       },
 
       logout(): void {
+        const currentAccessToken = store.accessToken();
+        if (currentAccessToken) {
+          api.logout(currentAccessToken).subscribe({
+            error: () => {
+              // Logout is best-effort. Local session is always cleared.
+            },
+          });
+        }
+
         const email = store.user()?.email;
         patchState(store, {
           user: null,
