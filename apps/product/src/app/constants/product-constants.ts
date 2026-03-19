@@ -20,7 +20,6 @@ export const PRODUCT_MESSAGES = {
   FAILED_TO_LOAD_LIST: 'Failed to load products. Please try again.',
   FAILED_TO_LOAD_DETAILS: 'Failed to load product details. Please try again.',
   FAILED_TO_ADD_TO_CART: 'Unable to add item to cart. Please try again.',
-  LOGIN_REQUIRED: 'Please sign in first to add items to cart.',
   PRODUCT_NOT_FOUND: 'Product not found.',
   ADDED_TO_CART: 'Item added to cart successfully.',
   REMOTE_READY: 'Product remote is ready',

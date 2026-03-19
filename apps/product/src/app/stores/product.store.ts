@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { SESSION_STORAGE_KEYS, type SessionState } from '@ecommerce-mf/session';
@@ -41,7 +42,12 @@ const initialState: ProductState = {
 export const ProductStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withMethods((store, api = inject(ProductApiService), bridge = inject(ProductShellBridgeService)) => {
+  withMethods((
+    store,
+    api = inject(ProductApiService),
+    bridge = inject(ProductShellBridgeService),
+    router = inject(Router),
+  ) => {
     const readAccessToken = (): string | null => {
       try {
         const rawSession = localStorage.getItem(SESSION_STORAGE_KEYS.AUTH_SESSION);
@@ -137,7 +143,7 @@ export const ProductStore = signalStore(
 
       const accessToken = readAccessToken();
       if (!accessToken) {
-        patchState(store, { addToCartError: PRODUCT_MESSAGES.LOGIN_REQUIRED });
+        void router.navigate(['/auth/login'], { queryParams: { returnUrl: router.url } });
         return null;
       }
 

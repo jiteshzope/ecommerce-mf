@@ -140,6 +140,35 @@ export const AuthStore = signalStore(
         );
       },
 
+      /**
+       * Re-reads localStorage and syncs in-memory state without publishing bridge events.
+       * Call this on navigating to login/register to avoid stale isAuthenticated signals
+       * left over from a previous session that was cleared via shell logout.
+       */
+      syncFromStorage(): void {
+        const session = readPersistedSession();
+        if (session?.isAuthenticated && session.user && session.token) {
+          patchState(store, {
+            user: {
+              id: session.user.id,
+              name: session.user.name,
+              email: session.user.email,
+              phoneNumber: session.user.phoneNumber ?? '',
+            },
+            accessToken: session.token,
+            isAuthenticated: true,
+            error: null,
+          });
+        } else {
+          patchState(store, {
+            user: null,
+            accessToken: null,
+            isAuthenticated: false,
+            error: null,
+          });
+        }
+      },
+
       async login(request: LoginRequest): Promise<boolean> {
         patchState(store, {
           isSubmitting: true,

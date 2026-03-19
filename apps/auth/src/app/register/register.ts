@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '../stores/auth.store';
 
 @Component({
@@ -20,6 +20,7 @@ import { AuthStore } from '../stores/auth.store';
 export class Register implements OnInit {
   readonly store = inject(AuthStore) as InstanceType<typeof AuthStore>;
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly name = signal('');
   readonly email = signal('');
@@ -35,9 +36,15 @@ export class Register implements OnInit {
       this.password() !== this.confirmPassword(),
   );
 
+  private getReturnUrl(): string {
+    const raw = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
+    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/product';
+  }
+
   async ngOnInit(): Promise<void> {
+    this.store.syncFromStorage();
     if (this.store.isAuthenticated()) {
-      await this.router.navigateByUrl('/product');
+      await this.router.navigateByUrl(this.getReturnUrl());
     }
   }
 
@@ -70,7 +77,7 @@ export class Register implements OnInit {
       this.password.set('');
       this.confirmPassword.set('');
       this.hasAttemptedSubmit.set(false);
-      await this.router.navigateByUrl('/product');
+      await this.router.navigateByUrl(this.getReturnUrl());
     }
   }
 

@@ -18,7 +18,7 @@
         <span>{{ store.user()?.name }}</span>
         <small>{{ store.user()?.email }}</small>
       </div>
-      <button type="button" (click)="store.logout()">Logout</button>
+      <button type="button" (click)="logout()">Logout</button>
     } @else {
       <button type="button" (click)="store.goToLogin()">Login</button>
       <button type="button" class="secondary" (click)="store.goToRegister()">Register</button>

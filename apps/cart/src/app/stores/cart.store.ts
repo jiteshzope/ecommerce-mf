@@ -1,5 +1,6 @@
-import { inject } from '@angular/core';
+import { inject, DestroyRef } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { CART_EVENT_TYPES } from '@ecommerce-mf/session';
 import { CartApiService, type CartApiItem } from '../services/cart-api.service';
@@ -23,7 +24,7 @@ const initialState: CartState = {
 export const CartStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withMethods((store, api = inject(CartApiService), bridge = inject(CartShellBridgeService)) => {
+  withMethods((store, api = inject(CartApiService), bridge = inject(CartShellBridgeService), destroyRef = inject(DestroyRef)) => {
     const loadData = async (): Promise<void> => {
       patchState(store, { loading: true, error: null });
 
@@ -45,6 +46,12 @@ export const CartStore = signalStore(
         bridge.publishCartCleared();
       }
     };
+
+    // Clear cart state when shell signals logout so the next user starts with a clean cart.
+    bridge.clearCart$.pipe(takeUntilDestroyed(destroyRef)).subscribe(() => {
+      patchState(store, { data: [], loading: false, error: null, empty: true });
+      bridge.publishCartCleared();
+    });
 
     return {
       loadData,

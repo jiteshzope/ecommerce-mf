@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
+import { Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import {
@@ -13,6 +14,9 @@ import {
 export class CartShellBridgeService {
   private readonly cartChannel = inject(CART_SHELL_CHANNEL, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly clearCartSubject = new Subject<void>();
+  readonly clearCart$ = this.clearCartSubject.asObservable();
 
   constructor() {
     // Subscribe to events arriving from the shell
@@ -37,6 +41,7 @@ export class CartShellBridgeService {
         break;
 
       case CART_EVENT_TYPES.CLEAR_CART:
+        this.clearCartSubject.next();
         console.log('[Cart ← Shell] Clear cart');
         break;
 
