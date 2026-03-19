@@ -4,14 +4,16 @@
     <p>Micro-frontend host</p>
   </div>
 
-  <nav aria-label="Primary navigation" class="main-nav">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-    <a routerLink="/product" routerLinkActive="active">Product</a>
-    <a routerLink="/cart" routerLinkActive="active">Cart</a>
-  </nav>
-
   <div class="auth-actions">
     @if (store.isAuthenticated()) {
+      <a class="cart-link" routerLink="/cart" aria-label="Open cart" title="Cart">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 4h2l2.2 9.1a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H7" />
+          <circle cx="10" cy="19" r="1.5" />
+          <circle cx="17" cy="19" r="1.5" />
+        </svg>
+        <span class="cart-badge">{{ store.cartItemCount() }}</span>
+      </a>
       <div class="signed-in-user">
         <span>{{ store.user()?.name }}</span>
         <small>{{ store.user()?.email }}</small>

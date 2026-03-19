@@ -1,6 +1,6 @@
 .shell-header {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   padding: 0.9rem 1rem;
@@ -22,27 +22,53 @@
   font-size: 0.82rem;
 }
 
-.main-nav {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.main-nav a {
-  text-decoration: none;
-  color: #334155;
-  font-weight: 600;
-}
-
-.main-nav a.active {
-  color: #0055b8;
-  text-decoration: underline;
-}
-
 .auth-actions {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  margin-left: auto;
+}
+
+.cart-link {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid #b7ccf3;
+  background: #eef4ff;
+  color: #0055b8;
+  text-decoration: none;
+}
+
+.cart-link svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #d92d20;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .signed-in-user {
@@ -73,11 +99,12 @@ button.secondary {
 
 @media (max-width: 850px) {
   .shell-header {
-    grid-template-columns: 1fr;
-    justify-items: start;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .main-nav {
-    justify-content: flex-start;
+  .auth-actions {
+    margin-left: 0;
+    flex-wrap: wrap;
   }
 }

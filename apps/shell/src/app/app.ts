@@ -1,6 +1,7 @@
 import { Component, effect, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthRemoteService } from './services/auth-remote.service';
+import { CartRemoteService } from './services/cart-remote.service';
 import { ShellHeaderComponent } from './components/shell-header/shell-header.component';
 import { ShellStore } from './stores/shell.store';
 
@@ -11,10 +12,9 @@ import { ShellStore } from './stores/shell.store';
   styleUrl: './app.scss',
 })
 export class App {
-  protected title = 'shell';
-
   readonly store = inject(ShellStore) as InstanceType<typeof ShellStore>;
   readonly authRemote = inject(AuthRemoteService);
+  readonly cartRemote = inject(CartRemoteService);
 
   constructor() {
     effect(() => {

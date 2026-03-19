@@ -3,13 +3,13 @@ import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { Router } from '@angular/router';
 import { SessionState, type SessionUser } from '@ecommerce-mf/session';
 import { AuthRemoteService } from '../services/auth-remote.service';
-import { CartRemoteService } from '../services/cart-remote.service';
 
 interface ShellState {
   authSession: SessionState | null;
   isAuthenticated: boolean;
   user: SessionUser | null;
   token: string | null;
+  cartItemCount: number;
 }
 
 const initialState: ShellState = {
@@ -17,6 +17,7 @@ const initialState: ShellState = {
   isAuthenticated: false,
   user: null,
   token: null,
+  cartItemCount: 0,
 };
 
 export const ShellStore = signalStore(
@@ -26,7 +27,6 @@ export const ShellStore = signalStore(
     (
       store,
       authRemote = inject(AuthRemoteService),
-      cartRemote = inject(CartRemoteService),
       router = inject(Router),
     ) => ({
       setAuthSession(session: SessionState): void {
@@ -44,6 +44,13 @@ export const ShellStore = signalStore(
           isAuthenticated: false,
           user: null,
           token: null,
+          cartItemCount: 0,
+        });
+      },
+
+      setCartItemCount(cartItemCount: number): void {
+        patchState(store, {
+          cartItemCount: Math.max(0, cartItemCount),
         });
       },
 
@@ -67,12 +74,9 @@ export const ShellStore = signalStore(
           isAuthenticated: false,
           user: null,
           token: null,
+          cartItemCount: 0,
         });
         void router.navigateByUrl('/');
-      },
-
-      addDemoCartItem(): void {
-        cartRemote.sendAddItem('product-101', 1);
       },
     }),
   ),

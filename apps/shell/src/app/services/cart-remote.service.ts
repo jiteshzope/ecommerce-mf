@@ -8,11 +8,13 @@ import {
   type CartShellEvent,
   type ShellCartEvent,
 } from '@ecommerce-mf/session';
+import { ShellStore } from '../stores/shell.store';
 
 @Injectable({ providedIn: 'root' })
 export class CartRemoteService {
   private readonly cartChannel = inject(CART_SHELL_CHANNEL, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
+  private readonly shellStore = inject(ShellStore) as InstanceType<typeof ShellStore>;
 
   constructor() {
     this.cartChannel?.events$
@@ -32,6 +34,7 @@ export class CartRemoteService {
         break;
 
       case CART_EVENT_TYPES.CART_UPDATED:
+        this.shellStore.setCartItemCount(event.payload.itemCount ?? 0);
         console.log('[Shell ← Cart] Cart updated', event.payload);
         break;
 
@@ -40,6 +43,7 @@ export class CartRemoteService {
         break;
 
       case CART_EVENT_TYPES.CART_CLEARED:
+        this.shellStore.setCartItemCount(0);
         console.log('[Shell ← Cart] Cart cleared');
         break;
 
