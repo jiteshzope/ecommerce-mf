@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: ecommerce-mf
+data:
+  PORT: "3000"
+  HOST: "0.0.0.0"
+  DATABASE_URL: "postgresql://app_user:app_password@postgres:5432/ecommerce"
+  # Replace YOUR_ELB_HOST with actual ELB hostname after Phase 5
+  CORS_ORIGIN: "http://YOUR_ELB_HOST"
+  SESSION_TTL_HOURS: "24"
