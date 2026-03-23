@@ -1,0 +1,74 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d ecommerce"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://app_user:app_password@postgres:5432/ecommerce
+      HOST: 0.0.0.0
+      PORT: 3000
+      CORS_ORIGIN: http://localhost:4200
+      JWT_SECRET: dev-secret-key-change-in-production
+      SESSION_TTL_HOURS: 24
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  shell:
+    build:
+      context: .
+      dockerfile: apps/shell/Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+
+  product:
+    build:
+      context: .
+      dockerfile: apps/product/Dockerfile
+    ports:
+      - "4201:80"
+    depends_on:
+      - api
+
+  cart:
+    build:
+      context: .
+      dockerfile: apps/cart/Dockerfile
+    ports:
+      - "4202:80"
+    depends_on:
+      - api
+
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+    ports:
+      - "4203:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
