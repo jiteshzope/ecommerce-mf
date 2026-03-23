@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: ecommerce-mf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          # Replace YOUR_ACCOUNT_ID with your 12-digit AWS account ID
+          image: YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ecommerce-mf/auth:latest
+          ports:
+            - containerPort: 80
