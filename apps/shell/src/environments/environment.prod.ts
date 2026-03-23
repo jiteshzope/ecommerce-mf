@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  ecommerceApiBaseUrl: 'https://your-api-domain/api/v1',
+  ecommerceApiBaseUrl: 'http://localhost:3000/api/v1',
 } as const;
