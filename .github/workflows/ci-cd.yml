@@ -1,0 +1,120 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  AWS_REGION: us-east-1
+  CLUSTER_NAME: ecommerce-mf
+
+jobs:
+  ci:
+    name: Lint + Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx nx run-many -t lint --projects=shell,product,cart,auth,session --parallel=4
+
+      - name: Unit tests
+        run: npx nx run-many -t test --projects=shell,product,cart,auth,session --parallel=4
+
+  deploy:
+    name: Build + Push + Deploy
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
+            docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+      - name: Build production apps
+        run: |
+          npx nx build shell   --configuration=production
+          npx nx build product --configuration=production
+          npx nx build cart    --configuration=production
+          npx nx build auth    --configuration=production
+          npx nx build api     --configuration=production
+
+      - name: Build + push Docker images
+        env:
+          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          REPO=$ECR_REGISTRY/ecommerce-mf
+
+          docker build -t $REPO/shell:$IMAGE_TAG   -f apps/shell/Dockerfile   .
+          docker build -t $REPO/product:$IMAGE_TAG -f apps/product/Dockerfile .
+          docker build -t $REPO/cart:$IMAGE_TAG    -f apps/cart/Dockerfile    .
+          docker build -t $REPO/auth:$IMAGE_TAG    -f apps/auth/Dockerfile    .
+          docker build -t $REPO/api:$IMAGE_TAG     -f api/Dockerfile          .
+
+          docker push $REPO/shell:$IMAGE_TAG
+          docker push $REPO/product:$IMAGE_TAG
+          docker push $REPO/cart:$IMAGE_TAG
+          docker push $REPO/auth:$IMAGE_TAG
+          docker push $REPO/api:$IMAGE_TAG
+
+          # Also tag :latest
+          docker tag $REPO/shell:$IMAGE_TAG   $REPO/shell:latest
+          docker tag $REPO/product:$IMAGE_TAG $REPO/product:latest
+          docker tag $REPO/cart:$IMAGE_TAG    $REPO/cart:latest
+          docker tag $REPO/auth:$IMAGE_TAG    $REPO/auth:latest
+          docker tag $REPO/api:$IMAGE_TAG     $REPO/api:latest
+
+          docker push $REPO/shell:latest
+          docker push $REPO/product:latest
+          docker push $REPO/cart:latest
+          docker push $REPO/auth:latest
+          docker push $REPO/api:latest
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Rolling deploy to EKS
+        env:
+          REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/ecommerce-mf
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          kubectl set image deployment/shell   shell=$REPO/shell:$IMAGE_TAG   -n ecommerce-mf
+          kubectl set image deployment/product product=$REPO/product:$IMAGE_TAG -n ecommerce-mf
+          kubectl set image deployment/cart    cart=$REPO/cart:$IMAGE_TAG     -n ecommerce-mf
+          kubectl set image deployment/auth    auth=$REPO/auth:$IMAGE_TAG     -n ecommerce-mf
+          kubectl set image deployment/api     api=$REPO/api:$IMAGE_TAG       -n ecommerce-mf
+
+          kubectl rollout status deployment/shell   -n ecommerce-mf
+          kubectl rollout status deployment/product -n ecommerce-mf
+          kubectl rollout status deployment/cart    -n ecommerce-mf
+          kubectl rollout status deployment/auth    -n ecommerce-mf
+          kubectl rollout status deployment/api     -n ecommerce-mf
