@@ -7,6 +7,6 @@ data:
   PORT: "3000"
   HOST: "0.0.0.0"
   DATABASE_URL: "postgresql://app_user:app_password@postgres:5432/ecommerce"
-  # Replace YOUR_ELB_HOST with actual ELB hostname after Phase 5
-  CORS_ORIGIN: "http://YOUR_ELB_HOST"
+  # ELB host updated for browser CORS origin
+  CORS_ORIGIN: "http://a5d10a03df4854b31852097b4df725ec-1461367908.us-east-1.elb.amazonaws.com"
   SESSION_TTL_HOURS: "24"
