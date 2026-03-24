@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { LoginRequest, RegisterRequest } from '@ecommerce-mf/session';
@@ -23,8 +23,7 @@ export interface AuthApiResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private readonly apiBaseUrl = environment.authApiBaseUrl.replace(/\/+$/, '');
-
-  constructor(private readonly http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   login(request: LoginRequest): Observable<AuthApiResponse> {
     return this.http.post<AuthApiResponse>(`${this.apiBaseUrl}/auth/login`, {
