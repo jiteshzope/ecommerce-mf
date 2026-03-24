@@ -12,6 +12,7 @@ import { ShellStore } from './stores/shell.store';
   styleUrl: './app.scss',
 })
 export class App {
+  title = 'shell';
   readonly store = inject(ShellStore) as InstanceType<typeof ShellStore>;
   readonly authRemote = inject(AuthRemoteService);
   readonly cartRemote = inject(CartRemoteService);

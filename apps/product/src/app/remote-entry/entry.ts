@@ -13,4 +13,8 @@ export class RemoteEntry implements OnInit {
   ngOnInit(): void {
     this.store.initialize();
   }
+
+  onRefresh(): void {
+    this.store.initialize();
+  }
 }
