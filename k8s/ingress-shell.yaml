@@ -1,19 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-api
+  name: ingress-shell
   namespace: ecommerce-mf
 spec:
   ingressClassName: nginx
   rules:
-    # ELB host updated for ingress routing
     - host: a5d10a03df4854b31852097b4df725ec-1461367908.us-east-1.elb.amazonaws.com
       http:
         paths:
-          - path: /api
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: api
+                name: shell
                 port:
-                  number: 3000
+                  number: 80
