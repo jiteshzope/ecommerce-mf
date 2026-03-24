@@ -9,16 +9,11 @@ import config from './module-federation.config';
 export default withModuleFederation(
   {
     ...config,
-    /*
-     * Remote overrides for production.
-     * Each entry is a pair of a unique name and the URL where it is deployed.
-     *
-     * e.g.
-     * remotes: [
-     *   ['app1', 'https://app1.example.com'],
-     *   ['app2', 'https://app2.example.com'],
-     * ]
-     */
+    remotes: [
+      ['product', 'http://a5d10a03df4854b31852097b4df725ec-1461367908.us-east-1.elb.amazonaws.com/product-remote/remoteEntry.mjs'],
+      ['cart',    'http://a5d10a03df4854b31852097b4df725ec-1461367908.us-east-1.elb.amazonaws.com/cart-remote/remoteEntry.mjs'],
+      ['auth',    'http://a5d10a03df4854b31852097b4df725ec-1461367908.us-east-1.elb.amazonaws.com/auth-remote/remoteEntry.mjs'],
+    ],
   },
   { dts: false },
 );
