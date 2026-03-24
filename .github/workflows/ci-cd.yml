@@ -2,13 +2,14 @@ name: CI/CD
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
   pull_request:
-    branches: [master]
+    branches: [main, master]
 
 env:
   AWS_REGION: us-east-1
   CLUSTER_NAME: ecommerce-mf
+  K8S_NAMESPACE: ecommerce-mf
 
 jobs:
   ci:
@@ -16,6 +17,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Fast-fail required secrets check
+        env:
+          AWS_ACCESS_KEY_ID_VALUE: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY_VALUE: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCOUNT_ID_VALUE: ${{ secrets.AWS_ACCOUNT_ID }}
+          ELB_HOST_VALUE: ${{ secrets.ELB_HOST }}
+        run: |
+          set -euo pipefail
+
+          missing=0
+
+          check_secret() {
+            local name="$1"
+            local value="$2"
+            if [ -z "$value" ]; then
+              echo "::error title=Missing required secret::$name is not set in repository secrets."
+              missing=1
+            fi
+          }
+
+          check_secret "AWS_ACCESS_KEY_ID" "$AWS_ACCESS_KEY_ID_VALUE"
+          check_secret "AWS_SECRET_ACCESS_KEY" "$AWS_SECRET_ACCESS_KEY_VALUE"
+          check_secret "AWS_ACCOUNT_ID" "$AWS_ACCOUNT_ID_VALUE"
+          check_secret "ELB_HOST" "$ELB_HOST_VALUE"
+
+          if [ "$missing" -ne 0 ]; then
+            echo "One or more required secrets are missing. Go to Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          if ! echo "$AWS_ACCOUNT_ID_VALUE" | grep -Eq '^[0-9]{12}$'; then
+            echo "::error title=Invalid AWS_ACCOUNT_ID::AWS_ACCOUNT_ID must be a 12-digit number."
+            exit 1
+          fi
+
+          if ! echo "$ELB_HOST_VALUE" | grep -Eq '^[a-zA-Z0-9.-]+$'; then
+            echo "::error title=Invalid ELB_HOST::ELB_HOST should be a hostname only (no http:// or path)."
+            exit 1
+          fi
+
+          echo "Required secrets are present and format checks passed."
 
       - uses: actions/setup-node@v4
         with:
@@ -35,7 +78,7 @@ jobs:
     name: Build + Push + Deploy
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
     steps:
       - uses: actions/checkout@v4
 
@@ -54,6 +97,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
       - name: Login to ECR
         run: |
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
@@ -69,9 +115,10 @@ jobs:
 
       - name: Build + push Docker images
         env:
-          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          set -euo pipefail
           REPO=$ECR_REGISTRY/ecommerce-mf
 
           docker build -t $REPO/shell:$IMAGE_TAG   -f apps/shell/Dockerfile   .
@@ -102,19 +149,91 @@ jobs:
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
+      - name: Apply Kubernetes manifests
+        run: |
+          set -euo pipefail
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/secrets.yaml
+          kubectl apply -f k8s/api-configmap.yaml
+          kubectl apply -f k8s/postgres-pvc.yaml
+          kubectl apply -f k8s/postgres-deployment.yaml
+          kubectl apply -f k8s/postgres-service.yaml
+          kubectl apply -f k8s/api-deployment.yaml
+          kubectl apply -f k8s/api-service.yaml
+          kubectl apply -f k8s/shell-deployment.yaml
+          kubectl apply -f k8s/shell-service.yaml
+          kubectl apply -f k8s/product-deployment.yaml
+          kubectl apply -f k8s/product-service.yaml
+          kubectl apply -f k8s/cart-deployment.yaml
+          kubectl apply -f k8s/cart-service.yaml
+          kubectl apply -f k8s/auth-deployment.yaml
+          kubectl apply -f k8s/auth-service.yaml
+          kubectl apply -f k8s/ingress-api.yaml
+          kubectl apply -f k8s/ingress-apps.yaml
+          kubectl apply -f k8s/ingress-shell.yaml
+
       - name: Rolling deploy to EKS
         env:
-          REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/ecommerce-mf
+          REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/ecommerce-mf
           IMAGE_TAG: ${{ github.sha }}
+          NS: ${{ env.K8S_NAMESPACE }}
         run: |
-          kubectl set image deployment/shell   shell=$REPO/shell:$IMAGE_TAG   -n ecommerce-mf
-          kubectl set image deployment/product product=$REPO/product:$IMAGE_TAG -n ecommerce-mf
-          kubectl set image deployment/cart    cart=$REPO/cart:$IMAGE_TAG     -n ecommerce-mf
-          kubectl set image deployment/auth    auth=$REPO/auth:$IMAGE_TAG     -n ecommerce-mf
-          kubectl set image deployment/api     api=$REPO/api:$IMAGE_TAG       -n ecommerce-mf
+          set -euo pipefail
+          kubectl set image deployment/shell   shell=$REPO/shell:$IMAGE_TAG     -n $NS
+          kubectl set image deployment/product product=$REPO/product:$IMAGE_TAG -n $NS
+          kubectl set image deployment/cart    cart=$REPO/cart:$IMAGE_TAG       -n $NS
+          kubectl set image deployment/auth    auth=$REPO/auth:$IMAGE_TAG       -n $NS
+          kubectl set image deployment/api     api=$REPO/api:$IMAGE_TAG         -n $NS
 
-          kubectl rollout status deployment/shell   -n ecommerce-mf
-          kubectl rollout status deployment/product -n ecommerce-mf
-          kubectl rollout status deployment/cart    -n ecommerce-mf
-          kubectl rollout status deployment/auth    -n ecommerce-mf
-          kubectl rollout status deployment/api     -n ecommerce-mf
+          kubectl rollout status deployment/shell   -n $NS --timeout=300s
+          kubectl rollout status deployment/product -n $NS --timeout=300s
+          kubectl rollout status deployment/cart    -n $NS --timeout=300s
+          kubectl rollout status deployment/auth    -n $NS --timeout=300s
+          kubectl rollout status deployment/api     -n $NS --timeout=300s
+
+      - name: Post-deploy resource check
+        run: |
+          set -euo pipefail
+          kubectl get deploy -n ${{ env.K8S_NAMESPACE }}
+          kubectl get pods -n ${{ env.K8S_NAMESPACE }} -o wide
+          kubectl get ingress -n ${{ env.K8S_NAMESPACE }}
+
+      - name: Smoke tests (ELB routes)
+        env:
+          ELB_HOST_SECRET: ${{ secrets.ELB_HOST }}
+        run: |
+          set -euo pipefail
+
+          ELB_HOST="$ELB_HOST_SECRET"
+          if [ -z "$ELB_HOST" ]; then
+            ELB_HOST="$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+          fi
+
+          if [ -z "$ELB_HOST" ]; then
+            echo "ELB host is empty."
+            exit 1
+          fi
+
+          echo "Using ELB host: $ELB_HOST"
+
+          check_200() {
+            local path="$1"
+            local code
+            code="$(curl -sS -o /tmp/resp.txt -w "%{http_code}" "http://$ELB_HOST$path")"
+            echo "$path -> $code"
+            [ "$code" = "200" ]
+          }
+
+          check_200 "/"
+          check_200 "/product-remote/remoteEntry.mjs"
+          check_200 "/cart-remote/remoteEntry.mjs"
+          check_200 "/auth-remote/remoteEntry.mjs"
+          check_200 "/api/v1/catalog/products"
+
+          ct_remote="$(curl -sSI "http://$ELB_HOST/product-remote/remoteEntry.mjs" | tr -d '\r' | grep -i '^content-type:' || true)"
+          echo "remoteEntry content-type: $ct_remote"
+          echo "$ct_remote" | grep -Eiq 'javascript'
+
+          ct_api="$(curl -sSI "http://$ELB_HOST/api/v1/catalog/products" | tr -d '\r' | grep -i '^content-type:' || true)"
+          echo "catalog content-type: $ct_api"
+          echo "$ct_api" | grep -Eiq 'application/json'
