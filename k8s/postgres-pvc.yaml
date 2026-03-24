@@ -4,6 +4,7 @@ metadata:
   name: postgres-pvc
   namespace: ecommerce-mf
 spec:
+  storageClassName: gp2
   accessModes: [ReadWriteOnce]
   resources:
     requests:

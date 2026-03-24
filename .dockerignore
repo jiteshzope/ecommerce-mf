@@ -1,0 +1,10 @@
+.git
+.gitignore
+.nx
+node_modules
+coverage
+dist
+tmp
+.vscode
+*.log
+**/*.tsbuildinfo
