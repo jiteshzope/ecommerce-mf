@@ -1,10 +1,11 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CartStore } from '../../stores/cart.store';
 
 @Component({
   selector: 'app-cart-items-list',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, RouterLink],
   templateUrl: './cart-items-list.component.html',
   styleUrl: './cart-items-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

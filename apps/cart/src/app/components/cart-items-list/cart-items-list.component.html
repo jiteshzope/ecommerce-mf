@@ -1,6 +1,9 @@
 <section class="cart-items-list">
   <h2>Cart</h2>
-  <button type="button" (click)="store.loadData()">Refresh Cart Data</button>
+  <div class="cart-actions">
+    <a class="products-link" routerLink="/product">Go to Products</a>
+    <button type="button" (click)="store.loadData()">Refresh Cart Data</button>
+  </div>
 
   @if (store.loading()) {
     <p>Loading cart data...</p>
