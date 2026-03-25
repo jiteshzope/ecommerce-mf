@@ -1,0 +1,59 @@
+$palette: (
+  brand-navy: #131921,
+  brand-slate: #232f3e,
+  brand-accent: #febd69,
+  brand-accent-strong: #f3a847,
+  link: #007185,
+  bg-page: #eaeded,
+  bg-muted: #f7f8fa,
+  surface: #ffffff,
+  text: #0f1111,
+  text-muted: #565959,
+  border: #d5d9d9,
+  danger: #b12704,
+  success: #067d62,
+  danger-soft: #fff5f2,
+  success-soft: #edf9f5,
+  surface-soft: #f3f3f3,
+  hero-text: #f3f6f8,
+  hero-text-muted: #dce4ea,
+  glow-cool: #f8fbff,
+  glow-warm: #fff7ea,
+  skeleton-base: #e8ebee,
+  skeleton-highlight: #f5f6f7,
+  bg-page-end: #e3e6e6,
+  shadow: rgba(15, 17, 17, 0.12)
+);
+
+@function color($token) {
+  @return map-get($palette, $token);
+}
+
+@mixin expose-theme-vars() {
+  :root {
+    --color-brand-navy: #{color(brand-navy)};
+    --color-brand-slate: #{color(brand-slate)};
+    --color-brand-accent: #{color(brand-accent)};
+    --color-brand-accent-strong: #{color(brand-accent-strong)};
+    --color-link: #{color(link)};
+    --color-bg-page: #{color(bg-page)};
+    --color-bg-muted: #{color(bg-muted)};
+    --color-surface: #{color(surface)};
+    --color-text: #{color(text)};
+    --color-text-muted: #{color(text-muted)};
+    --color-border: #{color(border)};
+    --color-danger: #{color(danger)};
+    --color-success: #{color(success)};
+    --color-danger-soft: #{color(danger-soft)};
+    --color-success-soft: #{color(success-soft)};
+    --color-surface-soft: #{color(surface-soft)};
+    --color-hero-text: #{color(hero-text)};
+    --color-hero-text-muted: #{color(hero-text-muted)};
+    --color-glow-cool: #{color(glow-cool)};
+    --color-glow-warm: #{color(glow-warm)};
+    --color-skeleton-base: #{color(skeleton-base)};
+    --color-skeleton-highlight: #{color(skeleton-highlight)};
+    --color-bg-page-end: #{color(bg-page-end)};
+    --color-shadow: #{color(shadow)};
+  }
+}

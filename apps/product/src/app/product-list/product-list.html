@@ -1,4 +1,12 @@
-<section class="catalog-content">
+<section class="catalog-content product-list-view">
+  <header class="list-intro">
+    <div>
+      <p class="eyebrow">Curated Picks</p>
+      <h2>Shop The Catalog</h2>
+      <p>Browse products, adjust quantity directly, and open details for full description.</p>
+    </div>
+  </header>
+
   @if (store.addToCartError()) {
     <aside class="state-banner state-banner--error">
       <p>{{ store.addToCartError() }}</p>
@@ -18,8 +26,14 @@
       @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
         <article class="product-card skeleton-card">
           <div class="skeleton-media"></div>
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line"></div>
+          <div class="product-meta">
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line skeleton-line--price"></div>
+          </div>
+          <div class="product-actions">
+            <div class="skeleton-pill"></div>
+            <div class="skeleton-stepper"></div>
+          </div>
         </article>
       }
     </section>
@@ -39,6 +53,10 @@
       <button type="button" (click)="store.loadProducts()">{{ labels.REFRESH_BUTTON }}</button>
     </section>
   } @else {
+    <section class="list-toolbar">
+      <p class="results-count">{{ store.products().length }} products available</p>
+    </section>
+
     <section class="catalog-grid">
       @for (product of store.products(); track product.id) {
         <article class="product-card">
@@ -51,6 +69,7 @@
           </a>
 
           <div class="product-meta">
+            <p class="meta-label">Prime pick</p>
             <h3>{{ product.title }}</h3>
             <p>{{ product.price | currency:'USD':'symbol':'1.2-2' }}</p>
           </div>
@@ -85,6 +104,10 @@
               </button>
             </div>
           </div>
+
+          @if (store.getItemQuantity(product.id.toString()) > 0) {
+            <p class="in-cart-pill">In cart: {{ store.getItemQuantity(product.id.toString()) }}</p>
+          }
         </article>
       }
     </section>

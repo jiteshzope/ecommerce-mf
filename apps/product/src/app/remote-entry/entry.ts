@@ -6,6 +6,7 @@ import { ProductStore } from '../stores/product.store';
   imports: [RouterOutlet],
   selector: 'app-product-entry',
   templateUrl: './entry.html',
+  styleUrls: ['./entry.scss'],
 })
 export class RemoteEntry implements OnInit {
   readonly store = inject(ProductStore) as InstanceType<typeof ProductStore>;
