@@ -1,3 +1,17 @@
-section {
-	padding: 1rem;
+.shell-app {
+	min-height: 100vh;
+
+	.shell-main {
+		padding: 1rem;
+		max-width: 1280px;
+		margin: 0 auto;
+	}
+}
+
+@media (max-width: 680px) {
+	.shell-app {
+		.shell-main {
+			padding: 0.7rem;
+		}
+	}
 }
