@@ -54,6 +54,7 @@ export const CART_EVENT_TYPES = {
 export const PRODUCT_EVENT_TYPES = {
   // Remote → Shell
   REMOTE_READY: 'remote-ready',
+  CART_UPDATED: 'cart-updated',
 
   // Shell → Remote
   LOAD_PRODUCT: 'load-product',

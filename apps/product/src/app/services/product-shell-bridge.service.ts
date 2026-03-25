@@ -63,4 +63,14 @@ export class ProductShellBridgeService {
       payload: { message: 'Product remote is ready' },
     });
   }
+
+  publishCartUpdated(productId: string): void {
+    this.publish({
+      type: PRODUCT_EVENT_TYPES.CART_UPDATED,
+      payload: {
+        message: 'Cart updated from product remote',
+        productId,
+      },
+    });
+  }
 }

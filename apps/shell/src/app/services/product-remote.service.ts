@@ -8,6 +8,7 @@ import {
   type ProductShellEvent,
   type ShellProductEvent,
 } from '@ecommerce-mf/session';
+import { ShellStore } from '../stores/shell.store';
 
 @Injectable({ providedIn: 'root' })
 export class ProductRemoteService {
@@ -15,6 +16,7 @@ export class ProductRemoteService {
     optional: true,
   });
   private readonly destroyRef = inject(DestroyRef);
+  private readonly shellStore = inject(ShellStore) as InstanceType<typeof ShellStore>;
 
   constructor() {
     this.productChannel?.events$
@@ -31,6 +33,13 @@ export class ProductRemoteService {
     switch (event.type) {
       case PRODUCT_EVENT_TYPES.REMOTE_READY:
         console.log('[Shell ← Product] Remote is ready');
+        break;
+
+      case PRODUCT_EVENT_TYPES.CART_UPDATED:
+        if (this.shellStore.isAuthenticated()) {
+          void this.shellStore.loadCartItemCount();
+        }
+        console.log('[Shell ← Product] Cart updated; refreshed item count', event.payload);
         break;
 
       default:

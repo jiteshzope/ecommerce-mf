@@ -2,6 +2,7 @@ import { Component, effect, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthRemoteService } from './services/auth-remote.service';
 import { CartRemoteService } from './services/cart-remote.service';
+import { ProductRemoteService } from './services/product-remote.service';
 import { ShellHeaderComponent } from './components/shell-header/shell-header.component';
 import { ShellStore } from './stores/shell.store';
 
@@ -16,6 +17,7 @@ export class App {
   readonly store = inject(ShellStore) as InstanceType<typeof ShellStore>;
   readonly authRemote = inject(AuthRemoteService);
   readonly cartRemote = inject(CartRemoteService);
+  readonly productRemote = inject(ProductRemoteService);
 
   constructor() {
     effect(() => {

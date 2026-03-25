@@ -156,6 +156,7 @@ export const ProductStore = signalStore(
             quantity,
           }),
         );
+        bridge.publishCartUpdated(productId);
         patchState(store, {
           addToCartSuccess: PRODUCT_MESSAGES.ADDED_TO_CART,
         });
