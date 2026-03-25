@@ -6,6 +6,7 @@ import { AuthStore } from '../stores/auth.store';
   imports: [RouterOutlet],
   selector: 'app-auth-entry',
   templateUrl: './entry.html',
+  styleUrls: ['./entry.scss'],
 })
 export class RemoteEntry implements OnInit {
   readonly store = inject(AuthStore) as InstanceType<typeof AuthStore>;

@@ -1,61 +1,17 @@
+@use './styles/theme' as theme;
+
+@include theme.expose-theme-vars();
+
 * {
 	box-sizing: border-box;
 }
 
 body {
 	margin: 0;
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	background: #f4f7fb;
-	color: #111827;
-}
-
-.auth-page {
-	max-width: 540px;
-	margin: 2rem auto;
-	padding: 0 1rem 2rem;
-}
-
-.auth-header h1 {
-	margin: 0;
-}
-
-.auth-header p {
-	margin: 0.5rem 0 1rem;
-	color: #616b79;
-}
-
-.auth-header nav {
-	display: flex;
-	gap: 1rem;
-	margin-bottom: 1rem;
-}
-
-.auth-header a {
-	text-decoration: none;
-	color: #0057b8;
-	font-weight: 600;
-}
-
-.auth-header a.active {
-	text-decoration: underline;
-}
-
-.session-strip {
-	margin: 0 0 1rem;
-	padding: 0.7rem 0.8rem;
-	border: 1px solid #cae8d1;
-	background: #eefaf0;
-	border-radius: 8px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 1rem;
-}
-
-.session-strip button {
-	border: 1px solid #8c98ac;
-	border-radius: 6px;
-	padding: 0.4rem 0.75rem;
-	background: #fff;
-	cursor: pointer;
+	min-height: 100vh;
+	font-family: 'Amazon Ember', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	background:
+		radial-gradient(circle at top, var(--color-glow-warm) 0%, transparent 40%),
+		linear-gradient(180deg, var(--color-bg-muted) 0%, var(--color-bg-page) 100%);
+	color: var(--color-text);
 }
