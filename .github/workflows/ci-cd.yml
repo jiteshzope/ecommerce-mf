@@ -107,12 +107,16 @@ jobs:
             docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
 
       - name: Build production apps
+        timeout-minutes: 20
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          NX_VERBOSE_LOGGING: "true"
         run: |
-          npx nx build shell   --configuration=production
-          npx nx build product --configuration=production
-          npx nx build cart    --configuration=production
-          npx nx build auth    --configuration=production
-          npx nx build api     --configuration=production
+          npx nx build product --configuration=production --verbose
+          npx nx build shell   --configuration=production --verbose
+          npx nx build cart    --configuration=production --verbose
+          npx nx build auth    --configuration=production --verbose
+          npx nx build api     --configuration=production --verbose
 
       - name: Build + push Docker images
         env:
