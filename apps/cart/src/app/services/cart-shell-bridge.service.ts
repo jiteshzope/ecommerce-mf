@@ -71,10 +71,10 @@ export class CartShellBridgeService {
     });
   }
 
-  publishCartUpdated(itemCount: number): void {
+  publishCartUpdated(): void {
     this.publish({
       type: 'cart-updated',
-      payload: { message: 'Cart items updated', itemCount },
+      payload: {},
     });
   }
 

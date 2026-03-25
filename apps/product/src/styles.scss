@@ -117,6 +117,41 @@ body {
 	padding: 0.75rem 0.9rem 0.95rem;
 	display: flex;
 	gap: 0.6rem;
+	align-items: center;
+}
+
+.quantity-controls {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+}
+
+.quantity-controls button {
+	min-width: 2rem;
+	min-height: 2rem;
+	padding: 0.2rem;
+	border-radius: 8px;
+}
+
+.quantity-status {
+	min-width: 1.75rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.item-quantity {
+	text-align: center;
+	font-weight: 700;
+}
+
+.quantity-spinner {
+	width: 1rem;
+	height: 1rem;
+	border: 0.14rem solid rgba(0, 0, 0, 0.18);
+	border-top-color: currentColor;
+	border-radius: 50%;
+	animation: quantity-spinner-rotate 0.7s linear infinite;
 }
 
 button,
@@ -297,6 +332,12 @@ button:disabled {
 	}
 	100% {
 		opacity: 0.6;
+	}
+}
+
+@keyframes quantity-spinner-rotate {
+	to {
+		transform: rotate(360deg);
 	}
 }
 

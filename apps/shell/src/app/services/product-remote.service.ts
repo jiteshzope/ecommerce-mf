@@ -38,8 +38,10 @@ export class ProductRemoteService {
       case PRODUCT_EVENT_TYPES.CART_UPDATED:
         if (this.shellStore.isAuthenticated()) {
           void this.shellStore.loadCartItemCount();
+        } else {
+          this.shellStore.setCartItemCount(0);
         }
-        console.log('[Shell ← Product] Cart updated; refreshed item count', event.payload);
+        console.log('[Shell ← Product] Cart updated; refreshed item count');
         break;
 
       default:

@@ -20,7 +20,11 @@ export class ProductList implements OnInit {
     void this.store.loadProducts();
   }
 
-  async onAddToCart(productId: number): Promise<void> {
-    await this.store.addToCart(String(productId), 1);
+  async onIncreaseQuantity(productId: number): Promise<void> {
+    await this.store.increaseItemQuantity(String(productId), 1);
+  }
+
+  async onDecreaseQuantity(productId: number): Promise<void> {
+    await this.store.decreaseItemQuantity(String(productId), 1);
   }
 }

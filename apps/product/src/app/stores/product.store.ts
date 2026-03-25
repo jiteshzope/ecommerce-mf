@@ -7,6 +7,7 @@ import { SESSION_STORAGE_KEYS, type SessionState } from '@ecommerce-mf/session';
 import {
   ProductApiService,
   type AddToCartApiResponse,
+  type CartApiItem,
   type ProductApiItem,
   type ProductDetailsApiItem,
 } from '../services/product-api.service';
@@ -19,6 +20,7 @@ interface ProductState {
   listLoading: boolean;
   detailsLoading: boolean;
   addToCartLoadingIds: string[];
+  cartQuantities: Record<string, number>;
   listError: string | null;
   detailsError: string | null;
   addToCartError: string | null;
@@ -32,6 +34,7 @@ const initialState: ProductState = {
   listLoading: false,
   detailsLoading: false,
   addToCartLoadingIds: [],
+  cartQuantities: {},
   listError: null,
   detailsError: null,
   addToCartError: null,
@@ -76,28 +79,30 @@ export const ProductStore = signalStore(
     };
 
     const loadProducts = async (): Promise<void> => {
-        patchState(store, {
-          listLoading: true,
-          listError: null,
-          addToCartError: null,
-          addToCartSuccess: null,
-        });
+      patchState(store, {
+        listLoading: true,
+        listError: null,
+        addToCartError: null,
+        addToCartSuccess: null,
+      });
 
-        try {
-          const products = await firstValueFrom(api.getProducts());
-          patchState(store, {
-            products,
-            listLoading: false,
-            empty: products.length === 0,
-          });
-        } catch {
-          patchState(store, {
-            listLoading: false,
-            listError: PRODUCT_MESSAGES.FAILED_TO_LOAD_LIST,
-            products: [],
-            empty: true,
-          });
-        }
+      try {
+        const products = await firstValueFrom(api.getProducts());
+        patchState(store, {
+          products,
+          listLoading: false,
+          empty: products.length === 0,
+        });
+      } catch {
+        patchState(store, {
+          listLoading: false,
+          listError: PRODUCT_MESSAGES.FAILED_TO_LOAD_LIST,
+          products: [],
+          empty: true,
+        });
+      }
+
+      await loadCartQuantities();
     };
 
     const loadProductDetails = async (productId: string): Promise<void> => {
@@ -114,6 +119,8 @@ export const ProductStore = signalStore(
           selectedProduct,
           detailsLoading: false,
         });
+
+        await loadCartQuantities();
       } catch (error) {
         const errorCode = readErrorCode(error);
         patchState(store, {
@@ -135,7 +142,33 @@ export const ProductStore = signalStore(
       patchState(store, { addToCartLoadingIds: next });
     };
 
-    const addToCart = async (productId: string, quantity = 1): Promise<AddToCartApiResponse | null> => {
+    const toQuantityMap = (items: CartApiItem[]): Record<string, number> => {
+      return items.reduce<Record<string, number>>((acc, item) => {
+        acc[String(item.productId)] = item.quantity;
+        return acc;
+      }, {});
+    };
+
+    const loadCartQuantities = async (): Promise<void> => {
+      const accessToken = readAccessToken();
+      if (!accessToken) {
+        patchState(store, { cartQuantities: {} });
+        return;
+      }
+
+      try {
+        const cartItems = await firstValueFrom(api.getCartItems(accessToken));
+        patchState(store, { cartQuantities: toQuantityMap(cartItems) });
+      } catch {
+        patchState(store, { cartQuantities: {} });
+      }
+    };
+
+    const mutateCartQuantity = async (
+      productId: string,
+      mode: 'increase' | 'decrease',
+      quantity = 1,
+    ): Promise<AddToCartApiResponse | null> => {
       patchState(store, {
         addToCartError: null,
         addToCartSuccess: null,
@@ -147,23 +180,51 @@ export const ProductStore = signalStore(
         return null;
       }
 
+      if (mode === 'decrease' && (store.cartQuantities()[productId] ?? 0) <= 0) {
+        return null;
+      }
+
       withAddToCartLoading(productId, true);
 
       try {
         const response = await firstValueFrom(
-          api.addToCart(accessToken, {
-            productId,
-            quantity,
-          }),
+          mode === 'increase'
+            ? api.addToCart(accessToken, { productId, quantity })
+            : api.removeFromCart(accessToken, { productId, quantity }),
         );
-        bridge.publishCartUpdated(productId);
+
+        const nextQuantity = response.quantity;
+        const shouldPublishCartUpdated =
+          (mode === 'increase' && nextQuantity === 1) ||
+          (mode === 'decrease' && (nextQuantity <= 0 || response.removed));
+
         patchState(store, {
-          addToCartSuccess: PRODUCT_MESSAGES.ADDED_TO_CART,
+          cartQuantities: {
+            ...store.cartQuantities(),
+            [productId]: nextQuantity,
+          },
+          addToCartSuccess:
+            mode === 'increase'
+              ? PRODUCT_MESSAGES.ADDED_TO_CART
+              : null,
         });
+
+        if (nextQuantity <= 0) {
+          const nextMap = { ...store.cartQuantities() };
+          delete nextMap[productId];
+          patchState(store, { cartQuantities: nextMap });
+        }
+
+        if (shouldPublishCartUpdated) {
+          bridge.publishCartUpdated();
+        }
         return response;
       } catch {
         patchState(store, {
-          addToCartError: PRODUCT_MESSAGES.FAILED_TO_ADD_TO_CART,
+          addToCartError:
+            mode === 'increase'
+              ? PRODUCT_MESSAGES.FAILED_TO_ADD_TO_CART
+              : PRODUCT_MESSAGES.FAILED_TO_REMOVE_FROM_CART,
         });
         return null;
       } finally {
@@ -171,17 +232,34 @@ export const ProductStore = signalStore(
       }
     };
 
+    const addToCart = async (productId: string, quantity = 1): Promise<AddToCartApiResponse | null> => {
+      return mutateCartQuantity(productId, 'increase', quantity);
+    };
+
     return {
       loadProducts,
       loadProductDetails,
       addToCart,
 
+      increaseItemQuantity(productId: string, quantity = 1): Promise<AddToCartApiResponse | null> {
+        return mutateCartQuantity(productId, 'increase', quantity);
+      },
+
+      decreaseItemQuantity(productId: string, quantity = 1): Promise<AddToCartApiResponse | null> {
+        return mutateCartQuantity(productId, 'decrease', quantity);
+      },
+
       isAddToCartLoading(productId: string): boolean {
         return store.addToCartLoadingIds().includes(productId);
       },
 
+      getItemQuantity(productId: string): number {
+        return store.cartQuantities()[productId] ?? 0;
+      },
+
       initialize(): void {
         bridge.publishRemoteReady();
+        void loadCartQuantities();
       },
 
       clearListError(): void {

@@ -33,12 +33,20 @@ export class ProductDetails implements OnInit {
     });
   }
 
-  async onAddToCart(): Promise<void> {
+  async onIncreaseQuantity(): Promise<void> {
     if (!this.selectedId) {
       return;
     }
 
-    await this.store.addToCart(this.selectedId, 1);
+    await this.store.increaseItemQuantity(this.selectedId, 1);
+  }
+
+  async onDecreaseQuantity(): Promise<void> {
+    if (!this.selectedId) {
+      return;
+    }
+
+    await this.store.decreaseItemQuantity(this.selectedId, 1);
   }
 
   onRetryDetails(): void {

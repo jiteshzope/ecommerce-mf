@@ -3,7 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { SESSION_STORAGE_KEYS, type SessionState } from '@ecommerce-mf/session';
-import { CartApiService, type CartApiItem } from '../services/cart-api.service';
+import { CartApiService, type CartApiItem, type UpdateCartQuantityResponse } from '../services/cart-api.service';
 import { CartShellBridgeService } from '../services/cart-shell-bridge.service';
 import { CART_MESSAGES } from '../constants/cart-constants';
 
@@ -54,7 +54,6 @@ export const CartStore = signalStore(
           loading: false,
           empty: data.length === 0,
         });
-        bridge.publishCartUpdated(data.length);
       } catch {
         patchState(store, {
           loading: false,
@@ -74,10 +73,65 @@ export const CartStore = signalStore(
       patchState(store, { mutatingProductIds: next });
     };
 
+    const applyItemMutation = (
+      response: UpdateCartQuantityResponse,
+      mode: 'increase' | 'decrease',
+    ): void => {
+      const responseProductId = Number(response.productId);
+      const currentData = store.data();
+      const existingItem = currentData.find((item) => Number(item.productId) === responseProductId);
+      const shouldPublishCartUpdated =
+        (mode === 'increase' && response.quantity === 1) ||
+        mode === 'decrease' && (response.quantity <= 0 || response.removed);
+
+      if (response.quantity <= 0 || response.removed) {
+        const nextData = currentData.filter((item) => Number(item.productId) !== responseProductId);
+        patchState(store, {
+          data: nextData,
+          empty: nextData.length === 0,
+        });
+        if (shouldPublishCartUpdated) {
+          bridge.publishCartUpdated();
+        }
+        return;
+      }
+
+      const nextPrice = response.price ?? existingItem?.price ?? 0;
+      const nextItem: CartApiItem = {
+        id: response.id ?? existingItem?.id ?? Date.now(),
+        productId: responseProductId,
+        quantity: response.quantity,
+        title: response.title ?? existingItem?.title ?? '',
+        url: response.url ?? existingItem?.url ?? '',
+        price: nextPrice,
+        lineTotal: nextPrice * response.quantity,
+      };
+
+      const nextData = existingItem
+        ? currentData.map((item) => (Number(item.productId) === responseProductId ? nextItem : item))
+        : [nextItem, ...currentData];
+
+      patchState(store, {
+        data: nextData,
+        empty: nextData.length === 0,
+      });
+      if (shouldPublishCartUpdated) {
+        bridge.publishCartUpdated();
+      }
+    };
+
     const updateItemQuantity = async (
       productId: number,
       mode: 'increase' | 'decrease',
     ): Promise<void> => {
+      const normalizedProductId = Number(productId);
+      if (!Number.isInteger(normalizedProductId) || normalizedProductId <= 0) {
+        patchState(store, {
+          error: CART_MESSAGES.FAILED_TO_LOAD,
+        });
+        return;
+      }
+
       const token = readAccessToken();
       if (!token) {
         patchState(store, {
@@ -89,16 +143,17 @@ export const CartStore = signalStore(
       }
 
       patchState(store, { error: null });
-      setMutatingProduct(productId, true);
+      setMutatingProduct(normalizedProductId, true);
 
       try {
+        let response: UpdateCartQuantityResponse;
         if (mode === 'increase') {
-          await firstValueFrom(api.addCartItem(token, { productId, quantity: 1 }));
+          response = await firstValueFrom(api.addCartItem(token, { productId: normalizedProductId, quantity: 1 }));
         } else {
-          await firstValueFrom(api.removeCartItem(token, { productId, quantity: 1 }));
+          response = await firstValueFrom(api.removeCartItem(token, { productId: normalizedProductId, quantity: 1 }));
         }
 
-        await loadData();
+        applyItemMutation(response, mode);
       } catch {
         patchState(store, {
           error:
@@ -107,7 +162,7 @@ export const CartStore = signalStore(
               : CART_MESSAGES.FAILED_TO_DECREASE_QUANTITY,
         });
       } finally {
-        setMutatingProduct(productId, false);
+        setMutatingProduct(normalizedProductId, false);
       }
     };
 

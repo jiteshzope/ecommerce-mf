@@ -17,7 +17,7 @@
       @for (item of store.data(); track item.id) {
         <li class="cart-item-row">
           <span class="item-title">{{ item.title }}</span>
-          <div class="quantity-controls">
+          <div class="quantity-controls" [attr.aria-busy]="store.isItemMutating(item.productId)">
             <button
               type="button"
               (click)="decreaseQuantity(item.productId)"
@@ -26,7 +26,13 @@
             >
               -
             </button>
-            <span class="item-quantity">{{ item.quantity }}</span>
+            <span class="quantity-status">
+              @if (store.isItemMutating(item.productId)) {
+                <span class="quantity-spinner" aria-hidden="true"></span>
+              } @else {
+                <span class="item-quantity">{{ item.quantity }}</span>
+              }
+            </span>
             <button
               type="button"
               (click)="increaseQuantity(item.productId)"

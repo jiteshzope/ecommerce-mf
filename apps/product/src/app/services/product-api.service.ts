@@ -26,6 +26,17 @@ export interface AddToCartApiResponse {
   title: string;
   url: string;
   price: number;
+  removed?: boolean;
+}
+
+export interface CartApiItem {
+  id: number;
+  productId: number;
+  title: string;
+  url: string;
+  quantity: number;
+  price: number;
+  lineTotal: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -41,8 +52,24 @@ export class ProductApiService {
     return this.http.get<ProductDetailsApiItem>(`${this.apiBaseUrl}/catalog/products/${productId}`);
   }
 
+  getCartItems(accessToken: string): Observable<CartApiItem[]> {
+    return this.http.get<CartApiItem[]>(`${this.apiBaseUrl}/cart`, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    });
+  }
+
   addToCart(accessToken: string, request: AddToCartRequest): Observable<AddToCartApiResponse> {
     return this.http.post<AddToCartApiResponse>(`${this.apiBaseUrl}/cart/items`, request, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    });
+  }
+
+  removeFromCart(accessToken: string, request: AddToCartRequest): Observable<AddToCartApiResponse> {
+    return this.http.post<AddToCartApiResponse>(`${this.apiBaseUrl}/cart/items/remove`, request, {
       headers: new HttpHeaders({
         Authorization: `Bearer ${accessToken}`,
       }),

@@ -34,8 +34,12 @@ export class CartRemoteService {
         break;
 
       case CART_EVENT_TYPES.CART_UPDATED:
-        this.shellStore.setCartItemCount(event.payload.itemCount ?? 0);
-        console.log('[Shell ← Cart] Cart updated', event.payload);
+        if (this.shellStore.isAuthenticated()) {
+          void this.shellStore.loadCartItemCount();
+        } else {
+          this.shellStore.setCartItemCount(0);
+        }
+        console.log('[Shell ← Cart] Cart updated; refreshed item count');
         break;
 
       case CART_EVENT_TYPES.CHECKOUT_INITIATED:

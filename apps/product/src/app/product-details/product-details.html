@@ -44,17 +44,31 @@
         <p class="detail-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</p>
         <p class="detail-description">{{ product.description }}</p>
 
-        <button
-          type="button"
-          (click)="onAddToCart()"
-          [disabled]="store.isAddToCartLoading(product.id.toString())"
-        >
-          @if (store.isAddToCartLoading(product.id.toString())) {
-            {{ labels.ADDING_TO_CART }}
-          } @else {
-            {{ labels.ADD_TO_CART }}
-          }
-        </button>
+        <div class="quantity-controls" [attr.aria-busy]="store.isAddToCartLoading(product.id.toString())">
+          <button
+            type="button"
+            (click)="onDecreaseQuantity()"
+            [disabled]="store.isAddToCartLoading(product.id.toString()) || store.getItemQuantity(product.id.toString()) <= 0"
+            aria-label="Decrease quantity"
+          >
+            -
+          </button>
+          <span class="quantity-status">
+            @if (store.isAddToCartLoading(product.id.toString())) {
+              <span class="quantity-spinner" aria-hidden="true"></span>
+            } @else {
+              <span class="item-quantity">{{ store.getItemQuantity(product.id.toString()) }}</span>
+            }
+          </span>
+          <button
+            type="button"
+            (click)="onIncreaseQuantity()"
+            [disabled]="store.isAddToCartLoading(product.id.toString())"
+            aria-label="Increase quantity"
+          >
+            +
+          </button>
+        </div>
       </div>
     </article>
   }

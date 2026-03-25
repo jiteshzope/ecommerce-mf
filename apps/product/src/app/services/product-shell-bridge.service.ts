@@ -64,13 +64,10 @@ export class ProductShellBridgeService {
     });
   }
 
-  publishCartUpdated(productId: string): void {
+  publishCartUpdated(): void {
     this.publish({
       type: PRODUCT_EVENT_TYPES.CART_UPDATED,
-      payload: {
-        message: 'Cart updated from product remote',
-        productId,
-      },
+      payload: {},
     });
   }
 }
