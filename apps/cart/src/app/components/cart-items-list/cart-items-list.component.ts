@@ -16,4 +16,12 @@ export class CartItemsListComponent implements OnInit {
   ngOnInit(): void {
     this.store.initialize();
   }
+
+  async increaseQuantity(productId: number): Promise<void> {
+    await this.store.increaseItemQuantity(productId);
+  }
+
+  async decreaseQuantity(productId: number): Promise<void> {
+    await this.store.decreaseItemQuantity(productId);
+  }
 }

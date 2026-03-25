@@ -15,7 +15,29 @@
   } @else {
     <ul>
       @for (item of store.data(); track item.id) {
-        <li>{{ item.title }} &times;{{ item.quantity }} - ${{ item.lineTotal | number: '1.2-2' }}</li>
+        <li class="cart-item-row">
+          <span class="item-title">{{ item.title }}</span>
+          <div class="quantity-controls">
+            <button
+              type="button"
+              (click)="decreaseQuantity(item.productId)"
+              [disabled]="store.isItemMutating(item.productId)"
+              aria-label="Decrease quantity"
+            >
+              -
+            </button>
+            <span class="item-quantity">{{ item.quantity }}</span>
+            <button
+              type="button"
+              (click)="increaseQuantity(item.productId)"
+              [disabled]="store.isItemMutating(item.productId)"
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+          <span class="item-total">${{ item.lineTotal | number: '1.2-2' }}</span>
+        </li>
       }
     </ul>
   }

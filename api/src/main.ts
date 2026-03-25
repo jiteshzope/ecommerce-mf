@@ -415,6 +415,76 @@ app.post('/api/v1/cart/items', authMiddleware, async (req: AuthedRequest, res, n
   }
 });
 
+app.post('/api/v1/cart/items/remove', authMiddleware, async (req: AuthedRequest, res, next) => {
+  try {
+    const productId = Number(req.body?.productId);
+    const quantity = req.body?.quantity ? Number(req.body.quantity) : 1;
+    const userId = Number(req.currentUser?.id);
+
+    if (!Number.isInteger(productId) || productId <= 0 || !Number.isInteger(quantity) || quantity <= 0) {
+      res.status(400).json({ message: 'INVALID_CART_ITEM_PAYLOAD' });
+      return;
+    }
+
+    const existingItem = await pool.query<{ id: number; quantity: number }>(
+      `SELECT id, quantity FROM cart_items WHERE user_id = $1 AND product_id = $2`,
+      [userId, productId],
+    );
+
+    if (!existingItem.rows[0]) {
+      res.status(404).json({ message: 'CART_ITEM_NOT_FOUND' });
+      return;
+    }
+
+    const currentQuantity = existingItem.rows[0].quantity;
+    const nextQuantity = currentQuantity - quantity;
+
+    if (nextQuantity > 0) {
+      const updated = await pool.query<{
+        id: number;
+        product_id: number;
+        quantity: number;
+        title: string;
+        image_url: string;
+        price: string;
+      }>(
+        `UPDATE cart_items
+         SET quantity = $1, updated_at = NOW()
+         WHERE user_id = $2 AND product_id = $3
+         RETURNING id, product_id, quantity,
+           (SELECT title FROM products WHERE id = product_id) AS title,
+           (SELECT image_url FROM products WHERE id = product_id) AS image_url,
+           (SELECT price FROM products WHERE id = product_id) AS price`,
+        [nextQuantity, userId, productId],
+      );
+
+      const item = updated.rows[0];
+      res.status(200).json({
+        id: item.id,
+        productId: item.product_id,
+        quantity: item.quantity,
+        title: item.title,
+        url: item.image_url,
+        price: Number(item.price),
+      });
+      return;
+    }
+
+    await pool.query(`DELETE FROM cart_items WHERE user_id = $1 AND product_id = $2`, [
+      userId,
+      productId,
+    ]);
+
+    res.status(200).json({
+      productId,
+      quantity: 0,
+      removed: true,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get('/api/v1/cart', authMiddleware, async (req: AuthedRequest, res, next) => {
   try {
     const userId = Number(req.currentUser?.id);

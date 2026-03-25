@@ -11,5 +11,7 @@ export const CART_APP_LABELS = {
 
 export const CART_MESSAGES = {
   FAILED_TO_LOAD: 'Failed to load cart data.',
+  FAILED_TO_INCREASE_QUANTITY: 'Failed to increase cart item quantity.',
+  FAILED_TO_DECREASE_QUANTITY: 'Failed to decrease cart item quantity.',
   REMOTE_READY: 'Cart remote is ready',
 } as const;
