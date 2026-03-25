@@ -1,58 +1,23 @@
 import type { SessionState } from './session-state';
 
-export interface BaseShellEvent<TSource extends string, TPayload> {
+export interface BaseShellEvent<TSource extends string> {
   source: TSource;
   type: string;
   timestamp: number;
-  payload: TPayload;
+  payload: any;
 }
 
-export type AuthShellEvent = BaseShellEvent<
-  'auth',
-  {
-    message: string;
-    email?: string;
-    session?: SessionState;
-    authorizationHeader?: string;
-  }
->;
+export type AuthShellEvent = BaseShellEvent<'auth'>;
 
-export type CartShellEvent = BaseShellEvent<
-  'cart',
-  {
-    message: string;
-    itemCount?: number;
-  }
->;
+export type CartShellEvent = BaseShellEvent<'cart'>;
 
-export type ProductShellEvent = BaseShellEvent<
-  'product',
-  {
-    message: string;
-    productId?: string;
-  }
->;
+export type ProductShellEvent = BaseShellEvent<'product'>;
 
 // Shell -> Cart remote events
-export type ShellCartEvent = BaseShellEvent<
-  'shell',
-  {
-    message: string;
-    productId?: string;
-    quantity?: number;
-  }
->;
+export type ShellCartEvent = BaseShellEvent<'shell'>;
 
 // Shell -> Product remote events
-export type ShellProductEvent = BaseShellEvent<
-  'shell',
-  {
-    message: string;
-    productId?: string;
-    category?: string;
-    query?: string;
-  }
->;
+export type ShellProductEvent = BaseShellEvent<'shell'>;
 
 export type AuthChannelEvent = AuthShellEvent;
 export type CartChannelEvent = CartShellEvent | ShellCartEvent;
