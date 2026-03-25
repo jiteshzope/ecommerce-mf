@@ -1,19 +1,40 @@
 <section class="cart-items-list">
-  <h2>Cart</h2>
+  <header class="cart-header">
+    <p class="eyebrow">Cart Remote</p>
+    <h2>Your Cart</h2>
+  </header>
+
   <div class="cart-actions">
     <a class="products-link" routerLink="/product">Go to Products</a>
     <button type="button" (click)="store.loadData()">Refresh Cart Data</button>
   </div>
 
   @if (store.loading()) {
-    <p>Loading cart data...</p>
+    <section class="cart-skeleton" aria-label="Loading cart items">
+      @for (skeleton of [1, 2, 3, 4]; track skeleton) {
+        <article class="cart-item-row skeleton-row">
+          <div class="skeleton-title"></div>
+          <div class="quantity-controls">
+            <span class="skeleton-dot"></span>
+            <span class="skeleton-dot"></span>
+            <span class="skeleton-dot"></span>
+          </div>
+          <div class="skeleton-price"></div>
+        </article>
+      }
+    </section>
   } @else if (store.error()) {
-    <p>{{ store.error() }}</p>
-    <button type="button" (click)="store.clearError()">Clear Error</button>
+    <section class="state-panel state-panel--error">
+      <p>{{ store.error() }}</p>
+      <button type="button" (click)="store.clearError()">Clear Error</button>
+    </section>
   } @else if (store.empty()) {
-    <p>No cart data found.</p>
+    <section class="state-panel">
+      <p>No cart data found.</p>
+      <a class="products-link" routerLink="/product">Browse Products</a>
+    </section>
   } @else {
-    <ul>
+    <ul class="cart-list">
       @for (item of store.data(); track item.id) {
         <li class="cart-item-row">
           <span class="item-title">{{ item.title }}</span>
