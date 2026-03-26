@@ -10,14 +10,7 @@
   @if (store.addToCartError()) {
     <aside class="state-banner state-banner--error">
       <p>{{ store.addToCartError() }}</p>
-      <button type="button" (click)="store.clearAddToCartMessage()">Dismiss</button>
-    </aside>
-  }
-
-  @if (store.addToCartSuccess()) {
-    <aside class="state-banner state-banner--success">
-      <p>{{ store.addToCartSuccess() }}</p>
-      <button type="button" (click)="store.clearAddToCartMessage()">Dismiss</button>
+      <button type="button" (click)="store.clearAddToCartError()">Dismiss</button>
     </aside>
   }
 

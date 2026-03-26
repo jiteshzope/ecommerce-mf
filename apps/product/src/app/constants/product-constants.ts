@@ -22,6 +22,5 @@ export const PRODUCT_MESSAGES = {
   FAILED_TO_ADD_TO_CART: 'Unable to add item to cart. Please try again.',
   FAILED_TO_REMOVE_FROM_CART: 'Unable to remove item from cart. Please try again.',
   PRODUCT_NOT_FOUND: 'Product not found.',
-  ADDED_TO_CART: 'Item added to cart successfully.',
   REMOTE_READY: 'Product remote is ready',
 } as const;

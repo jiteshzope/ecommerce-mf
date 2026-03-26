@@ -24,7 +24,6 @@ interface ProductState {
   listError: string | null;
   detailsError: string | null;
   addToCartError: string | null;
-  addToCartSuccess: string | null;
   empty: boolean;
 }
 
@@ -38,7 +37,6 @@ const initialState: ProductState = {
   listError: null,
   detailsError: null,
   addToCartError: null,
-  addToCartSuccess: null,
   empty: true,
 };
 
@@ -83,7 +81,6 @@ export const ProductStore = signalStore(
         listLoading: true,
         listError: null,
         addToCartError: null,
-        addToCartSuccess: null,
       });
 
       try {
@@ -110,7 +107,6 @@ export const ProductStore = signalStore(
         detailsLoading: true,
         detailsError: null,
         addToCartError: null,
-        addToCartSuccess: null,
       });
 
       try {
@@ -171,7 +167,6 @@ export const ProductStore = signalStore(
     ): Promise<AddToCartApiResponse | null> => {
       patchState(store, {
         addToCartError: null,
-        addToCartSuccess: null,
       });
 
       const accessToken = readAccessToken();
@@ -203,10 +198,6 @@ export const ProductStore = signalStore(
             ...store.cartQuantities(),
             [productId]: nextQuantity,
           },
-          addToCartSuccess:
-            mode === 'increase'
-              ? PRODUCT_MESSAGES.ADDED_TO_CART
-              : null,
         });
 
         if (nextQuantity <= 0) {
@@ -270,10 +261,9 @@ export const ProductStore = signalStore(
         patchState(store, { detailsError: null });
       },
 
-      clearAddToCartMessage(): void {
+      clearAddToCartError(): void {
         patchState(store, {
           addToCartError: null,
-          addToCartSuccess: null,
         });
       },
 
