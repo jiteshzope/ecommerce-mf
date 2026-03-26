@@ -133,11 +133,7 @@ export const AuthStore = signalStore(
           error: null,
         });
 
-        bridge.publishLoginSuccess(
-          persistedSession.user.email,
-          persistedSession,
-          AUTH_MESSAGES.SESSION_RESTORED,
-        );
+        bridge.publishLoginSuccess();
       },
 
       /**
@@ -178,10 +174,7 @@ export const AuthStore = signalStore(
         try {
           const response = await firstValueFrom(api.login(request));
           applySuccess(response);
-          bridge.publishLoginSuccess(
-            response.user.email,
-            createSession(response.user, response.accessToken),
-          );
+          bridge.publishLoginSuccess();
           return true;
         } catch {
           applyFailure(AUTH_MESSAGES.INVALID_LOGIN);
@@ -199,10 +192,7 @@ export const AuthStore = signalStore(
         try {
           const response = await firstValueFrom(api.register(request));
           applySuccess(response);
-          bridge.publishRegisterSuccess(
-            response.user.email,
-            createSession(response.user, response.accessToken),
-          );
+          bridge.publishRegisterSuccess();
           return true;
         } catch (error) {
           const errorCode = readErrorCode(error);
@@ -226,7 +216,6 @@ export const AuthStore = signalStore(
           });
         }
 
-        const email = store.user()?.email;
         patchState(store, {
           user: null,
           accessToken: null,
@@ -234,7 +223,7 @@ export const AuthStore = signalStore(
           error: null,
         });
         clearPersistedSession();
-        bridge.publishLogout(email);
+        bridge.publishLogout();
       },
 
       clearError(): void {

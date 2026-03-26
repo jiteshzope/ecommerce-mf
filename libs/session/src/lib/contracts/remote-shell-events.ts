@@ -1,10 +1,7 @@
-import type { SessionState } from './session-state';
-
 export interface BaseShellEvent<TSource extends string> {
   source: TSource;
   type: string;
   timestamp: number;
-  payload: any;
 }
 
 export type AuthShellEvent = BaseShellEvent<'auth'>;

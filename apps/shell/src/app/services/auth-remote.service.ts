@@ -41,52 +41,42 @@ export class AuthRemoteService {
   private handleAuthEvent(event: AuthShellEvent): void {
     switch (event.type) {
       case AUTH_EVENT_TYPES.REMOTE_READY:
+        this.restorePersistedSession();
         console.log('[Shell ← Auth] Remote is ready');
         break;
 
       case AUTH_EVENT_TYPES.LOGIN_SUCCESS:
-        if (event.payload.session) {
-          this.setSession(event.payload.session);
-        }
-        console.log('[Shell ← Auth] Login succeeded', event.payload);
+        this.restorePersistedSession();
+        console.log('[Shell ← Auth] Login succeeded');
         break;
 
       case AUTH_EVENT_TYPES.LOGIN_FAILED:
-        console.log('[Shell ← Auth] Login failed', event.payload);
+        console.log('[Shell ← Auth] Login failed');
         break;
 
       case AUTH_EVENT_TYPES.LOGOUT:
         this.clearSession();
-        console.log('[Shell ← Auth] User logged out', event.payload);
+        console.log('[Shell ← Auth] User logged out');
         break;
 
       case AUTH_EVENT_TYPES.REGISTER_SUCCESS:
-        if (event.payload.session) {
-          this.setSession(event.payload.session);
-        }
-        console.log('[Shell ← Auth] Registration succeeded', event.payload);
+        this.restorePersistedSession();
+        console.log('[Shell ← Auth] Registration succeeded');
         break;
 
       default:
-        console.log('[Shell ← Auth] Unknown event type:', event.type, event.payload);
+        console.log('[Shell ← Auth] Unknown event type:', event.type);
     }
   }
 
   private setSession(session: SessionState): void {
     this.sessionState.set(session);
-
-    try {
-      localStorage.setItem(SESSION_STORAGE_KEYS.SHELL_AUTH_SESSION, JSON.stringify(session));
-    } catch {
-      // Ignore storage failures to avoid breaking auth event handling.
-    }
   }
 
   clearSession(): void {
     this.sessionState.set(null);
 
     try {
-      localStorage.removeItem(SESSION_STORAGE_KEYS.SHELL_AUTH_SESSION);
       // Also clear the auth MFE's persisted session so it does not restore on app reload.
       localStorage.removeItem(SESSION_STORAGE_KEYS.AUTH_SESSION);
     } catch {
@@ -96,20 +86,21 @@ export class AuthRemoteService {
 
   private restorePersistedSession(): void {
     try {
-      const rawSession = localStorage.getItem(SESSION_STORAGE_KEYS.SHELL_AUTH_SESSION);
+      const rawSession = localStorage.getItem(SESSION_STORAGE_KEYS.AUTH_SESSION);
       if (!rawSession) {
+        this.sessionState.set(null);
         return;
       }
 
       const parsedSession = JSON.parse(rawSession) as SessionState;
       if (!parsedSession?.isAuthenticated || !parsedSession.user || !parsedSession.token) {
-        this.clearSession();
+        this.sessionState.set(null);
         return;
       }
 
       this.sessionState.set(parsedSession);
     } catch {
-      this.clearSession();
+      this.sessionState.set(null);
     }
   }
 }

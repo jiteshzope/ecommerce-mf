@@ -45,7 +45,7 @@ export class ProductRemoteService {
         break;
 
       default:
-        console.log('[Shell ← Product] Unknown event type:', event.type, event.payload);
+        console.log('[Shell ← Product] Unknown event type:', event.type);
     }
   }
 
@@ -61,24 +61,21 @@ export class ProductRemoteService {
     });
   }
 
-  sendLoadProduct(productId: string): void {
+  sendLoadProduct(): void {
     this.publishToProduct({
       type: PRODUCT_EVENT_TYPES.LOAD_PRODUCT,
-      payload: { message: 'Load product details', productId },
     });
   }
 
   sendClearSelection(): void {
     this.publishToProduct({
       type: PRODUCT_EVENT_TYPES.CLEAR_SELECTION,
-      payload: { message: 'Clear current product selection' },
     });
   }
 
-  sendFilterByCategory(category: string, query?: string): void {
+  sendFilterByCategory(): void {
     this.publishToProduct({
       type: PRODUCT_EVENT_TYPES.FILTER_BY_CATEGORY,
-      payload: { message: 'Apply product filter', category, query },
     });
   }
 }

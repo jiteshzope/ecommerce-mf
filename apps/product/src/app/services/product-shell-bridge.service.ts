@@ -31,7 +31,7 @@ export class ProductShellBridgeService {
   private handleShellEvent(event: ShellProductEvent): void {
     switch (event.type) {
       case PRODUCT_EVENT_TYPES.LOAD_PRODUCT:
-        console.log('[Product ← Shell] Load product', event.payload);
+        console.log('[Product ← Shell] Load product event received');
         break;
 
       case PRODUCT_EVENT_TYPES.CLEAR_SELECTION:
@@ -39,11 +39,11 @@ export class ProductShellBridgeService {
         break;
 
       case PRODUCT_EVENT_TYPES.FILTER_BY_CATEGORY:
-        console.log('[Product ← Shell] Filter by category', event.payload);
+        console.log('[Product ← Shell] Filter by category event received');
         break;
 
       default:
-        console.log('[Product ← Shell] Unknown event type:', event.type, event.payload);
+        console.log('[Product ← Shell] Unknown event type:', event.type);
     }
   }
 
@@ -60,14 +60,12 @@ export class ProductShellBridgeService {
   publishRemoteReady(): void {
     this.publish({
       type: 'remote-ready',
-      payload: { message: 'Product remote is ready' },
     });
   }
 
   publishCartUpdated(): void {
     this.publish({
       type: PRODUCT_EVENT_TYPES.CART_UPDATED,
-      payload: {},
     });
   }
 }

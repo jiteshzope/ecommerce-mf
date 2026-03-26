@@ -43,7 +43,7 @@ export class CartRemoteService {
         break;
 
       case CART_EVENT_TYPES.CHECKOUT_INITIATED:
-        console.log('[Shell ← Cart] Checkout initiated', event.payload);
+        console.log('[Shell ← Cart] Checkout initiated');
         break;
 
       case CART_EVENT_TYPES.CART_CLEARED:
@@ -52,7 +52,7 @@ export class CartRemoteService {
         break;
 
       default:
-        console.log('[Shell ← Cart] Unknown event type:', event.type, event.payload);
+        console.log('[Shell ← Cart] Unknown event type:', event.type);
     }
   }
 
@@ -66,31 +66,27 @@ export class CartRemoteService {
     });
   }
 
-  sendAddItem(productId: string, quantity: number): void {
+  sendAddItem(): void {
     this.publishToCart({
       type: CART_EVENT_TYPES.ADD_ITEM,
-      payload: { message: 'Add item to cart', productId, quantity },
     });
   }
 
-  sendRemoveItem(productId: string): void {
+  sendRemoveItem(): void {
     this.publishToCart({
       type: CART_EVENT_TYPES.REMOVE_ITEM,
-      payload: { message: 'Remove item from cart', productId },
     });
   }
 
   sendClearCart(): void {
     this.publishToCart({
       type: CART_EVENT_TYPES.CLEAR_CART,
-      payload: { message: 'Clear the entire cart' },
     });
   }
 
   sendSyncCart(): void {
     this.publishToCart({
       type: CART_EVENT_TYPES.SYNC_CART,
-      payload: { message: 'Sync cart state with server' },
     });
   }
 }
