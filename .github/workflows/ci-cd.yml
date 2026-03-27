@@ -25,6 +25,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY_VALUE: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ACCOUNT_ID_VALUE: ${{ secrets.AWS_ACCOUNT_ID }}
           ELB_HOST_VALUE: ${{ secrets.ELB_HOST }}
+          POSTGRES_PASSWORD_VALUE: ${{ secrets.POSTGRES_PASSWORD }}
+          JWT_SECRET_VALUE: ${{ secrets.JWT_SECRET }}
         run: |
           set -euo pipefail
 
@@ -43,6 +45,8 @@ jobs:
           check_secret "AWS_SECRET_ACCESS_KEY" "$AWS_SECRET_ACCESS_KEY_VALUE"
           check_secret "AWS_ACCOUNT_ID" "$AWS_ACCOUNT_ID_VALUE"
           check_secret "ELB_HOST" "$ELB_HOST_VALUE"
+          check_secret "POSTGRES_PASSWORD" "$POSTGRES_PASSWORD_VALUE"
+          check_secret "JWT_SECRET" "$JWT_SECRET_VALUE"
 
           if [ "$missing" -ne 0 ]; then
             echo "One or more required secrets are missing. Go to Settings -> Secrets and variables -> Actions."
@@ -165,12 +169,26 @@ jobs:
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
+      - name: Create/update Kubernetes secrets
+        env:
+          NS: ${{ env.K8S_NAMESPACE }}
+          POSTGRES_PASSWORD_VALUE: ${{ secrets.POSTGRES_PASSWORD }}
+          JWT_SECRET_VALUE: ${{ secrets.JWT_SECRET }}
+        run: |
+          set -euo pipefail
+          kubectl apply -f k8s/namespace.yaml
+          kubectl create secret generic ecommerce-secrets \
+            --namespace "$NS" \
+            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD_VALUE" \
+            --from-literal=JWT_SECRET="$JWT_SECRET_VALUE" \
+            --from-literal=DATABASE_URL="postgresql://app_user:$POSTGRES_PASSWORD_VALUE@postgres:5432/ecommerce" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Apply Kubernetes manifests
         if: steps.changes.outputs.k8s == 'true'
         run: |
           set -euo pipefail
           kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/secrets.yaml
           kubectl apply -f k8s/api-configmap.yaml
           kubectl apply -f k8s/postgres-pvc.yaml
           kubectl apply -f k8s/postgres-deployment.yaml

@@ -44,3 +44,7 @@ Thumbs.db
 .angular
 
 vitest.config.*.timestamp*
+
+# local/runtime secrets
+api/.env
+k8s/secrets.yaml
