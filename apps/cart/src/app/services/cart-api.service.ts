@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -33,21 +33,15 @@ export class CartApiService {
   private readonly http = inject(HttpClient);
   private readonly apiBaseUrl = environment.ecommerceApiBaseUrl.replace(/\/+$/, '');
 
-  getCartItems(token: string): Observable<CartApiItem[]> {
-    return this.http.get<CartApiItem[]>(`${this.apiBaseUrl}/cart`, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-    });
+  getCartItems(): Observable<CartApiItem[]> {
+    return this.http.get<CartApiItem[]>(`${this.apiBaseUrl}/cart`);
   }
 
-  addCartItem(token: string, request: UpdateCartQuantityRequest): Observable<UpdateCartQuantityResponse> {
-    return this.http.post<UpdateCartQuantityResponse>(`${this.apiBaseUrl}/cart/items`, request, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-    });
+  addCartItem(request: UpdateCartQuantityRequest): Observable<UpdateCartQuantityResponse> {
+    return this.http.post<UpdateCartQuantityResponse>(`${this.apiBaseUrl}/cart/items`, request);
   }
 
-  removeCartItem(token: string, request: UpdateCartQuantityRequest): Observable<UpdateCartQuantityResponse> {
-    return this.http.post<UpdateCartQuantityResponse>(`${this.apiBaseUrl}/cart/items/remove`, request, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-    });
+  removeCartItem(request: UpdateCartQuantityRequest): Observable<UpdateCartQuantityResponse> {
+    return this.http.post<UpdateCartQuantityResponse>(`${this.apiBaseUrl}/cart/items/remove`, request);
   }
 }

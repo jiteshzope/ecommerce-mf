@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { LoginRequest, RegisterRequest } from '@ecommerce-mf/session';
 import { environment } from '../../environments/environment';
@@ -42,17 +42,9 @@ export class AuthApiService {
     });
   }
 
-  logout(accessToken: string): Observable<void> {
+  logout(): Observable<void> {
     return this.http
-      .post<{ message: string }>(
-        `${this.apiBaseUrl}/auth/logout`,
-        {},
-        {
-          headers: new HttpHeaders({
-            Authorization: `Bearer ${accessToken}`,
-          }),
-        },
-      )
+      .post<{ message: string }>(`${this.apiBaseUrl}/auth/logout`, {})
       .pipe(map(() => undefined));
   }
 }

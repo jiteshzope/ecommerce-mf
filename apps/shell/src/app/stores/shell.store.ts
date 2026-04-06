@@ -64,7 +64,7 @@ export const ShellStore = signalStore(
         }
 
         try {
-          const cartItemCount = await firstValueFrom(shellApi.getCartItemCount(store.token()!));
+          const cartItemCount = await firstValueFrom(shellApi.getCartItemCount());
 
           if (!store.isAuthenticated()) {
             return;

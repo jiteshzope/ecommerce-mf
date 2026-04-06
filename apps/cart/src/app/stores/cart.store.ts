@@ -48,7 +48,7 @@ export const CartStore = signalStore(
       }
 
       try {
-        const data = await firstValueFrom(api.getCartItems(token));
+        const data = await firstValueFrom(api.getCartItems());
         patchState(store, {
           data,
           loading: false,
@@ -148,9 +148,9 @@ export const CartStore = signalStore(
       try {
         let response: UpdateCartQuantityResponse;
         if (mode === 'increase') {
-          response = await firstValueFrom(api.addCartItem(token, { productId: normalizedProductId, quantity: 1 }));
+          response = await firstValueFrom(api.addCartItem({ productId: normalizedProductId, quantity: 1 }));
         } else {
-          response = await firstValueFrom(api.removeCartItem(token, { productId: normalizedProductId, quantity: 1 }));
+          response = await firstValueFrom(api.removeCartItem({ productId: normalizedProductId, quantity: 1 }));
         }
 
         applyItemMutation(response, mode);

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -52,27 +52,15 @@ export class ProductApiService {
     return this.http.get<ProductDetailsApiItem>(`${this.apiBaseUrl}/catalog/products/${productId}`);
   }
 
-  getCartItems(accessToken: string): Observable<CartApiItem[]> {
-    return this.http.get<CartApiItem[]>(`${this.apiBaseUrl}/cart`, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${accessToken}`,
-      }),
-    });
+  getCartItems(): Observable<CartApiItem[]> {
+    return this.http.get<CartApiItem[]>(`${this.apiBaseUrl}/cart`);
   }
 
-  addToCart(accessToken: string, request: AddToCartRequest): Observable<AddToCartApiResponse> {
-    return this.http.post<AddToCartApiResponse>(`${this.apiBaseUrl}/cart/items`, request, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${accessToken}`,
-      }),
-    });
+  addToCart(request: AddToCartRequest): Observable<AddToCartApiResponse> {
+    return this.http.post<AddToCartApiResponse>(`${this.apiBaseUrl}/cart/items`, request);
   }
 
-  removeFromCart(accessToken: string, request: AddToCartRequest): Observable<AddToCartApiResponse> {
-    return this.http.post<AddToCartApiResponse>(`${this.apiBaseUrl}/cart/items/remove`, request, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${accessToken}`,
-      }),
-    });
+  removeFromCart(request: AddToCartRequest): Observable<AddToCartApiResponse> {
+    return this.http.post<AddToCartApiResponse>(`${this.apiBaseUrl}/cart/items/remove`, request);
   }
 }

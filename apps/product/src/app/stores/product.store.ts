@@ -153,7 +153,7 @@ export const ProductStore = signalStore(
       }
 
       try {
-        const cartItems = await firstValueFrom(api.getCartItems(accessToken));
+        const cartItems = await firstValueFrom(api.getCartItems());
         patchState(store, { cartQuantities: toQuantityMap(cartItems) });
       } catch {
         patchState(store, { cartQuantities: {} });
@@ -184,8 +184,8 @@ export const ProductStore = signalStore(
       try {
         const response = await firstValueFrom(
           mode === 'increase'
-            ? api.addToCart(accessToken, { productId, quantity })
-            : api.removeFromCart(accessToken, { productId, quantity }),
+            ? api.addToCart({ productId, quantity })
+            : api.removeFromCart({ productId, quantity }),
         );
 
         const nextQuantity = response.quantity;

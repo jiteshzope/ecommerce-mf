@@ -209,7 +209,7 @@ export const AuthStore = signalStore(
       logout(): void {
         const currentAccessToken = store.accessToken();
         if (currentAccessToken) {
-          api.logout(currentAccessToken).subscribe({
+          api.logout().subscribe({
             error: () => {
               // Logout is best-effort. Local session is always cleared.
             },
