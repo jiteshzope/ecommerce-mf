@@ -31,7 +31,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
-    headless: false,
+    headless: isCI,
     testIdAttribute: 'data-testid',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
