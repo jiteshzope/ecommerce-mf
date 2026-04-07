@@ -33,6 +33,11 @@ export class CartShellBridgeService {
   private handleShellEvent(event: ShellCartEvent): void {
     switch (event.type) {
 
+      case CART_EVENT_TYPES.CLEAR_CART:
+        this.clearCartSubject.next();
+        console.log('[Cart ← Shell] Clear cart');
+        break;
+
 
       case CART_EVENT_TYPES.SYNC_CART:
         console.log('[Cart ← Shell] Sync cart with server');
