@@ -2,8 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 
-// For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
+const isCI = process.env['CI'] === 'true';
+const useDeployedApp = Boolean(process.env['BASE_URL']);
 
 /**
  * Read environment variables from file.
@@ -16,53 +17,40 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
+  fullyParallel: true,
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
+  outputDir: '../../dist/.playwright/apps/shell-e2e/test-results',
+  reporter: isCI
+    ? [
+        ['github'],
+        ['blob', { outputDir: '../../dist/.playwright/apps/shell-e2e/blob-report' }],
+        ['html', { open: 'never', outputFolder: '../../dist/.playwright/apps/shell-e2e/html-report' }],
+      ]
+    : [['list'], ['html', { open: 'never', outputFolder: '../../dist/.playwright/apps/shell-e2e/html-report' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    headless: false,
+    testIdAttribute: 'data-testid',
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
   },
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npx nx run shell:serve',
-    url: 'http://localhost:4200',
-    reuseExistingServer: true,
-    cwd: workspaceRoot,
-  },
+  webServer: useDeployedApp
+    ? undefined
+    : {
+        command: 'npx nx run shell:serve',
+        url: 'http://localhost:4200',
+        reuseExistingServer: !isCI,
+        cwd: workspaceRoot,
+        timeout: 120 * 1000,
+      },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    // Uncomment for mobile browsers support
-    /* {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    }, */
-
-    // Uncomment for branded browsers
-    /* {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    },
-    {
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    } */
   ],
 });
