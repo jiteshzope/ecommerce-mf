@@ -73,6 +73,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
       - name: Lint
         run: npx nx run-many -t lint --projects=shell,product,cart,auth,session --parallel=4
 
@@ -233,7 +236,8 @@ jobs:
           kubectl get pods -n ${{ env.K8S_NAMESPACE }} -o wide
           kubectl get ingress -n ${{ env.K8S_NAMESPACE }}
 
-      - name: Smoke tests (ELB routes)
+      - name: Resolve deployment base URL
+        id: deployment-url
         env:
           ELB_HOST_SECRET: ${{ secrets.ELB_HOST }}
         run: |
@@ -250,11 +254,18 @@ jobs:
           fi
 
           echo "Using ELB host: $ELB_HOST"
+          echo "base_url=http://$ELB_HOST" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke tests (ELB routes)
+        env:
+          BASE_URL: ${{ steps.deployment-url.outputs.base_url }}
+        run: |
+          set -euo pipefail
 
           check_200() {
             local path="$1"
             local code
-            code="$(curl -sS -o /tmp/resp.txt -w "%{http_code}" "http://$ELB_HOST$path")"
+            code="$(curl -sS -o /tmp/resp.txt -w "%{http_code}" "$BASE_URL$path")"
             echo "$path -> $code"
             [ "$code" = "200" ]
           }
@@ -265,10 +276,44 @@ jobs:
           check_200 "/auth-remote/remoteEntry.mjs"
           check_200 "/api/v1/catalog/products"
 
-          ct_remote="$(curl -sSI "http://$ELB_HOST/product-remote/remoteEntry.mjs" | tr -d '\r' | grep -i '^content-type:' || true)"
+          ct_remote="$(curl -sSI "$BASE_URL/product-remote/remoteEntry.mjs" | tr -d '\r' | grep -i '^content-type:' || true)"
           echo "remoteEntry content-type: $ct_remote"
           echo "$ct_remote" | grep -Eiq 'javascript'
 
-          ct_api="$(curl -sSI "http://$ELB_HOST/api/v1/catalog/products" | tr -d '\r' | grep -i '^content-type:' || true)"
+          ct_api="$(curl -sSI "$BASE_URL/api/v1/catalog/products" | tr -d '\r' | grep -i '^content-type:' || true)"
           echo "catalog content-type: $ct_api"
           echo "$ct_api" | grep -Eiq 'application/json'
+
+      - name: Wait for deployed shell readiness
+        env:
+          BASE_URL: ${{ steps.deployment-url.outputs.base_url }}
+        run: |
+          set -euo pipefail
+
+          for attempt in {1..20}; do
+            if curl -fsS "$BASE_URL/product" >/dev/null; then
+              echo "Shell is reachable at $BASE_URL"
+              exit 0
+            fi
+
+            echo "Waiting for deployed shell to become reachable (attempt $attempt/20)..."
+            sleep 15
+          done
+
+          echo "Deployed shell never became reachable at $BASE_URL"
+          exit 1
+
+      - name: Post-deploy Playwright validation
+        env:
+          BASE_URL: ${{ steps.deployment-url.outputs.base_url }}
+          CI: 'true'
+        run: npx nx run shell-e2e:e2e --outputStyle=static
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shell-e2e-playwright-artifacts
+          path: dist/.playwright/apps/shell-e2e
+          if-no-files-found: ignore
+          retention-days: 14
