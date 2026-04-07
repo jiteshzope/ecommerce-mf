@@ -4,7 +4,7 @@
 		<p>Register a new account before signing in.</p>
 	</header>
 
-	<form #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)" novalidate>
+	<form #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)" novalidate data-testid="register-form">
 		<div class="field">
 			<label for="name">Full name</label>
 			<input
@@ -119,7 +119,11 @@
 			</div>
 		}
 
-		<button type="submit" [disabled]="registerForm.invalid || passwordsDoNotMatch() || store.isSubmitting()">
+		<button
+			type="submit"
+			data-testid="register-submit"
+			[disabled]="registerForm.invalid || passwordsDoNotMatch() || store.isSubmitting()"
+		>
 			{{ store.isSubmitting() ? 'Creating account...' : 'Register' }}
 		</button>
 	</form>

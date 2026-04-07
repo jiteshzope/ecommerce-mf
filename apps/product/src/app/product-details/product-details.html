@@ -1,4 +1,4 @@
-<section class="product-details-wrap">
+<section class="product-details-wrap" data-testid="product-details-page">
   <a class="ghost-link back-link" routerLink="/product">{{ labels.BACK_TO_LIST }}</a>
 
   @if (store.addToCartError()) {
@@ -27,7 +27,7 @@
       </div>
     </section>
   } @else if (store.selectedProduct(); as product) {
-    <article class="product-detail-card">
+    <article class="product-detail-card" [attr.data-testid]="'product-details-card-' + product.id">
       <div class="detail-media">
         <img [src]="product.url" [alt]="product.title" />
       </div>
@@ -37,12 +37,17 @@
         <p class="detail-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</p>
         <p class="detail-description">{{ product.description }}</p>
 
-        <div class="quantity-controls" [attr.aria-busy]="store.isAddToCartLoading(product.id.toString())">
+        <div
+          class="quantity-controls"
+          [attr.aria-busy]="store.isAddToCartLoading(product.id.toString())"
+          [attr.data-testid]="'product-details-quantity-controls-' + product.id"
+        >
           <button
             type="button"
             (click)="onDecreaseQuantity()"
             [disabled]="store.isAddToCartLoading(product.id.toString()) || store.getItemQuantity(product.id.toString()) <= 0"
             aria-label="Decrease quantity"
+            [attr.data-testid]="'product-details-decrease-' + product.id"
           >
             -
           </button>
@@ -50,7 +55,9 @@
             @if (store.isAddToCartLoading(product.id.toString())) {
               <span class="quantity-spinner" aria-hidden="true"></span>
             } @else {
-              <span class="item-quantity">{{ store.getItemQuantity(product.id.toString()) }}</span>
+              <span class="item-quantity" [attr.data-testid]="'product-details-quantity-' + product.id">
+                {{ store.getItemQuantity(product.id.toString()) }}
+              </span>
             }
           </span>
           <button
@@ -58,6 +65,7 @@
             (click)="onIncreaseQuantity()"
             [disabled]="store.isAddToCartLoading(product.id.toString())"
             aria-label="Increase quantity"
+            [attr.data-testid]="'product-details-increase-' + product.id"
           >
             +
           </button>

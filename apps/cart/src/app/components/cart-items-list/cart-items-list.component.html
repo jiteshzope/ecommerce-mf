@@ -1,4 +1,4 @@
-<section class="cart-items-list">
+<section class="cart-items-list" data-testid="cart-page">
   <header class="cart-header">
     <p class="eyebrow">Cart Remote</p>
     <h2>Your Cart</h2>
@@ -34,16 +34,21 @@
       <a class="products-link" routerLink="/product">Browse Products</a>
     </section>
   } @else {
-    <ul class="cart-list">
+    <ul class="cart-list" data-testid="cart-list">
       @for (item of store.data(); track item.id) {
-        <li class="cart-item-row">
-          <span class="item-title">{{ item.title }}</span>
-          <div class="quantity-controls" [attr.aria-busy]="store.isItemMutating(item.productId)">
+        <li class="cart-item-row" [attr.data-testid]="'cart-item-' + item.productId">
+          <span class="item-title" [attr.data-testid]="'cart-item-title-' + item.productId">{{ item.title }}</span>
+          <div
+            class="quantity-controls"
+            [attr.aria-busy]="store.isItemMutating(item.productId)"
+            [attr.data-testid]="'cart-quantity-controls-' + item.productId"
+          >
             <button
               type="button"
               (click)="decreaseQuantity(item.productId)"
               [disabled]="store.isItemMutating(item.productId)"
               aria-label="Decrease quantity"
+              [attr.data-testid]="'cart-decrease-' + item.productId"
             >
               -
             </button>
@@ -51,7 +56,9 @@
               @if (store.isItemMutating(item.productId)) {
                 <span class="quantity-spinner" aria-hidden="true"></span>
               } @else {
-                <span class="item-quantity">{{ item.quantity }}</span>
+                <span class="item-quantity" [attr.data-testid]="'cart-quantity-' + item.productId">
+                  {{ item.quantity }}
+                </span>
               }
             </span>
             <button
@@ -59,11 +66,14 @@
               (click)="increaseQuantity(item.productId)"
               [disabled]="store.isItemMutating(item.productId)"
               aria-label="Increase quantity"
+              [attr.data-testid]="'cart-increase-' + item.productId"
             >
               +
             </button>
           </div>
-          <span class="item-total">${{ item.lineTotal | number: '1.2-2' }}</span>
+          <span class="item-total" [attr.data-testid]="'cart-total-' + item.productId">
+            ${{ item.lineTotal | number: '1.2-2' }}
+          </span>
         </li>
       }
     </ul>

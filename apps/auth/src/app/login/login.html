@@ -4,7 +4,7 @@
 		<p>Use your account credentials to access your session.</p>
 	</header>
 
-	<form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" novalidate>
+	<form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" novalidate data-testid="login-form">
 		<div class="field">
 			<label for="email">Email</label>
 			<input
@@ -52,7 +52,7 @@
 			</div>
 		}
 
-		<button type="submit" [disabled]="loginForm.invalid || store.isSubmitting()">
+		<button type="submit" data-testid="login-submit" [disabled]="loginForm.invalid || store.isSubmitting()">
 			{{ store.isSubmitting() ? 'Signing in...' : 'Login' }}
 		</button>
 	</form>

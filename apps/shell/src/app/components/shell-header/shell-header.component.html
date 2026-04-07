@@ -1,4 +1,4 @@
-<header class="shell-header">
+<header class="shell-header" data-testid="shell-header">
   <div class="brand-area">
     <h1>Ecommerce Shell</h1>
     <p>Micro-frontend host</p>
@@ -6,22 +6,28 @@
 
   <div class="auth-actions">
     @if (store.isAuthenticated()) {
-      <a class="cart-link" routerLink="/cart" aria-label="Open cart" title="Cart">
+      <a
+        class="cart-link"
+        routerLink="/cart"
+        aria-label="Open cart"
+        title="Cart"
+        data-testid="cart-link"
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M3 4h2l2.2 9.1a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H7" />
           <circle cx="10" cy="19" r="1.5" />
           <circle cx="17" cy="19" r="1.5" />
         </svg>
-        <span class="cart-badge">{{ store.cartItemCount() }}</span>
+        <span class="cart-badge" data-testid="cart-badge">{{ store.cartItemCount() }}</span>
       </a>
-      <div class="signed-in-user">
+      <div class="signed-in-user" data-testid="signed-in-user">
         <span>{{ store.user()?.name }}</span>
         <small>{{ store.user()?.email }}</small>
       </div>
-      <button type="button" (click)="logout()">Logout</button>
+      <button type="button" data-testid="logout-button" (click)="logout()">Logout</button>
     } @else {
-      <button type="button" (click)="store.goToLogin()">Login</button>
-      <button type="button" class="secondary" (click)="store.goToRegister()">Register</button>
+      <button type="button" data-testid="login-button" (click)="store.goToLogin()">Login</button>
+      <button type="button" class="secondary" data-testid="register-button" (click)="store.goToRegister()">Register</button>
     }
   </div>
 </header>

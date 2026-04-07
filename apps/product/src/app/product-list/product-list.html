@@ -1,4 +1,4 @@
-<section class="catalog-content product-list-view">
+<section class="catalog-content product-list-view" data-testid="product-list-page">
   <header class="list-intro">
     <div>
       <p class="eyebrow">Curated Picks</p>
@@ -50,13 +50,14 @@
       <p class="results-count">{{ store.products().length }} products available</p>
     </section>
 
-    <section class="catalog-grid">
+    <section class="catalog-grid" data-testid="catalog-grid">
       @for (product of store.products(); track product.id) {
-        <article class="product-card">
+        <article class="product-card" [attr.data-testid]="'product-card-' + product.id">
           <a
             class="product-media"
             [routerLink]="[product.id]"
             [attr.aria-label]="'View details for ' + product.title"
+            [attr.data-testid]="'product-details-link-' + product.id"
           >
             <img [src]="product.url" [alt]="product.title" loading="lazy" />
           </a>
@@ -71,12 +72,17 @@
             <a class="ghost-link" [routerLink]="[product.id]">
               {{ labels.VIEW_DETAILS }}
             </a>
-            <div class="quantity-controls" [attr.aria-busy]="store.isAddToCartLoading(product.id.toString())">
+            <div
+              class="quantity-controls"
+              [attr.aria-busy]="store.isAddToCartLoading(product.id.toString())"
+              [attr.data-testid]="'product-quantity-controls-' + product.id"
+            >
               <button
                 type="button"
                 (click)="onDecreaseQuantity(product.id)"
                 [disabled]="store.isAddToCartLoading(product.id.toString()) || store.getItemQuantity(product.id.toString()) <= 0"
                 aria-label="Decrease quantity"
+                [attr.data-testid]="'product-decrease-' + product.id"
               >
                 -
               </button>
@@ -84,7 +90,9 @@
                 @if (store.isAddToCartLoading(product.id.toString())) {
                   <span class="quantity-spinner" aria-hidden="true"></span>
                 } @else {
-                  <span class="item-quantity">{{ store.getItemQuantity(product.id.toString()) }}</span>
+                  <span class="item-quantity" [attr.data-testid]="'product-quantity-' + product.id">
+                    {{ store.getItemQuantity(product.id.toString()) }}
+                  </span>
                 }
               </span>
               <button
@@ -92,6 +100,7 @@
                 (click)="onIncreaseQuantity(product.id)"
                 [disabled]="store.isAddToCartLoading(product.id.toString())"
                 aria-label="Increase quantity"
+                [attr.data-testid]="'product-increase-' + product.id"
               >
                 +
               </button>
@@ -99,7 +108,9 @@
           </div>
 
           @if (store.getItemQuantity(product.id.toString()) > 0) {
-            <p class="in-cart-pill">In cart: {{ store.getItemQuantity(product.id.toString()) }}</p>
+            <p class="in-cart-pill" [attr.data-testid]="'product-in-cart-' + product.id">
+              In cart: {{ store.getItemQuantity(product.id.toString()) }}
+            </p>
           }
         </article>
       }
