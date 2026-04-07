@@ -1,36 +1,40 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { RemoteEntry } from './entry';
+import { ProductStore } from '../stores/product.store';
 
 describe('RemoteEntry', () => {
-    let component: RemoteEntry;
-    let fixture: ComponentFixture<RemoteEntry>;
+    const configureTestingModule = async () => {
+        const store = {
+            initialize: vi.fn(),
+        };
 
-    beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [RemoteEntry],
+            providers: [provideRouter([]), { provide: ProductStore, useValue: store }],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(RemoteEntry);
-        component = fixture.componentInstance;
-    });
+        return { store };
+    };
 
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
+    it('creates the component and initializes the store on first render', async () => {
+        const { store } = await configureTestingModule();
+        const fixture = TestBed.createComponent(RemoteEntry);
 
-    it('should render product remote heading', () => {
         fixture.detectChanges();
-        const heading = fixture.nativeElement.querySelector('h2');
-        expect(heading?.textContent).toContain('Product Remote');
+
+        expect(fixture.componentInstance).toBeTruthy();
+        expect(store.initialize).toHaveBeenCalledTimes(1);
+        expect(fixture.nativeElement.querySelector('h2')?.textContent).toContain('Product Remote');
     });
 
-    it('should render refresh button', () => {
+    it('refreshes the store when the refresh button is clicked', async () => {
+        const { store } = await configureTestingModule();
+        const fixture = TestBed.createComponent(RemoteEntry);
+
         fixture.detectChanges();
-        const button = fixture.nativeElement.querySelector('button');
-        expect(button?.textContent).toContain('Refresh Product Data');
-    });
+        fixture.nativeElement.querySelector('button')?.click();
 
-    it('should compile without errors', () => {
-        expect(fixture.componentInstance).toBeDefined();
+        expect(store.initialize).toHaveBeenCalledTimes(2);
     });
 });
